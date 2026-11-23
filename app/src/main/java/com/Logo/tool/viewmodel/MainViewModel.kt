@@ -6,17 +6,18 @@ import android.net.Uri
 import android.util.Base64
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.Logo.tool.media.NativeBootAnimOptions
+import com.Logo.tool.media.VideoFrameExtractor
 import com.Logo.tool.root.BackupEntry
-import com.Logo.tool.root.BootAnimFoundResult
 import com.Logo.tool.root.DumpResult
 import com.Logo.tool.root.FlashMode
 import com.Logo.tool.root.FlashResult
 import com.Logo.tool.root.PartitionInfo
 import com.Logo.tool.root.RootManager
 import com.Logo.tool.root.SlotTarget
+import com.Logo.tool.ui.AppStrings
 import com.Logo.tool.util.FileUtils
 import com.Logo.tool.util.MtkValidationResult
-import com.Logo.tool.util.ZipBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +27,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import java.io.File
 import java.io.FileInputStream
 import java.text.SimpleDateFormat
@@ -50,7 +52,7 @@ data class SelectedImageFile(
 )
 
 data class WebInjectPayload(
-    val kind: String, // "logo" or "bootanim"
+    val kind: String,
     val fileName: String,
     val file: File
 )
@@ -58,9 +60,18 @@ data class WebInjectPayload(
 sealed interface UiEvent {
     data class InjectToWebView(val payload: WebInjectPayload) : UiEvent
     data class SyncWebTheme(val isDark: Boolean) : UiEvent
+    data class SyncWebLang(val lang: String) : UiEvent
+    data class EvalWebJs(val script: String) : UiEvent
+    data class SetKeepScreenOn(val enabled: Boolean) : UiEvent
     data class ShareFile(val file: File, val displayName: String, val mimeType: String) : UiEvent
-    data class PromptSaveDocument(val sourceFile: File, val suggestedName: String, val mimeType: String) : UiEvent
-    data class ShowMessage(val text: String) : UiEvent
+    data class PromptSafSave(
+        val sourceFile: File,
+        val suggestedName: String,
+        val mimeType: String,
+        val deleteAfterSave: Boolean
+    ) : UiEvent
+    data object ScrollToFlashCard : UiEvent
+    data class ShowMessage(val text: String, val isError: Boolean = false) : UiEvent
 }
 
 data class MainUiState(
@@ -75,16 +86,12 @@ data class MainUiState(
     val trimTrailingFf: Boolean = true,
     val lastDumpResult: DumpResult? = null,
     val lastEditedLogoFile: SelectedImageFile? = null,
-    val selectedFlashFile: SelectedImageFile? = null,
+    val pendingFlashFile: SelectedImageFile? = null,
     val flashMode: FlashMode = FlashMode.BACKUP_AND_FLASH,
     val flashBothSlots: Boolean = false,
     val lastFlashResult: FlashResult? = null,
     val backups: List<BackupEntry> = emptyList(),
     val backupLoadError: String? = null,
-    val zipWithBackup: Boolean = true,
-    val lastZipPath: String? = null,
-    val lastZipCacheFile: File? = null,
-    val bootAnimResult: BootAnimFoundResult? = null,
     val logs: List<String> = emptyList()
 )
 
@@ -106,8 +113,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     )
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
-    private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 8)
+    private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 16)
     val events = _events.asSharedFlow()
+
+    @Volatile
+    var lastPickedVideoUri: Uri? = null
 
     init {
         refreshRootEnvironment()
@@ -118,16 +128,34 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun toggleTheme(currentlyDark: Boolean) {
-        val next = if (currentlyDark) ThemePreference.LIGHT else ThemePreference.DARK
-        prefs.edit().putString("theme_pref", next.name).apply()
-        _uiState.update { it.copy(themePref = next) }
-        _events.tryEmit(UiEvent.SyncWebTheme(next == ThemePreference.DARK))
+        val nextMode = if (currentlyDark) "light" else "dark"
+        setThemeFromBridge(nextMode)
+    }
+
+    fun setThemeFromBridge(mode: String) {
+        val pref = when (mode.lowercase(Locale.US)) {
+            "dark" -> ThemePreference.DARK
+            "light" -> ThemePreference.LIGHT
+            else -> ThemePreference.SYSTEM
+        }
+        prefs.edit().putString("theme_pref", pref.name).apply()
+        _uiState.update { it.copy(themePref = pref) }
+        if (pref != ThemePreference.SYSTEM) {
+            _events.tryEmit(UiEvent.SyncWebTheme(pref == ThemePreference.DARK))
+        }
     }
 
     fun toggleLanguage() {
         val next = if (_uiState.value.language == "id") "en" else "id"
-        prefs.edit().putString("language", next).apply()
-        _uiState.update { it.copy(language = next) }
+        setLanguageFromBridge(next)
+    }
+
+    fun setLanguageFromBridge(lang: String) {
+        val clean = if (lang.lowercase(Locale.US) == "en") "en" else "id"
+        if (_uiState.value.language == clean) return
+        prefs.edit().putString("language", clean).apply()
+        _uiState.update { it.copy(language = clean) }
+        _events.tryEmit(UiEvent.SyncWebLang(clean))
     }
 
     fun setDumpSlotTarget(target: SlotTarget) {
@@ -147,8 +175,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update { it.copy(flashBothSlots = both) }
     }
 
-    fun setZipWithBackup(withBackup: Boolean) {
-        _uiState.update { it.copy(zipWithBackup = withBackup) }
+    fun clearPendingFlashFile() {
+        _uiState.update { it.copy(pendingFlashFile = null, lastFlashResult = null) }
     }
 
     fun appendLog(message: String) {
@@ -161,6 +189,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun clearLogs() {
         _uiState.update { it.copy(logs = emptyList()) }
+    }
+
+    fun emitMessage(text: String, isError: Boolean = false) {
+        _events.tryEmit(UiEvent.ShowMessage(text, isError))
     }
 
     fun refreshRootEnvironment() {
@@ -187,7 +219,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 val partInfo = partRes.getOrNull()
                 val partErr = partRes.exceptionOrNull()?.message
-
                 if (partErr != null) {
                     appendLog("ERROR deteksi partisi: $partErr")
                 }
@@ -195,16 +226,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 val bkRes = withContext(Dispatchers.IO) {
                     rootManager.backupStore.listBackups()
                 }
-                val backups = bkRes.getOrDefault(emptyList())
-                val bkErr = bkRes.exceptionOrNull()?.message
-
                 _uiState.update {
                     it.copy(
                         isRootAvailable = true,
                         partitionInfo = partInfo,
                         partitionError = partErr,
-                        backups = backups,
-                        backupLoadError = bkErr
+                        backups = bkRes.getOrDefault(emptyList()),
+                        backupLoadError = bkRes.exceptionOrNull()?.message
                     )
                 }
             } finally {
@@ -225,31 +253,58 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun onWebDownloadSaved(savedPath: String, cacheCopy: File, fileName: String) {
-        appendLog("Editor menyimpan: $savedPath (${FileUtils.formatBytes(cacheCopy.length())})")
-        if (fileName.endsWith(".img", ignoreCase = true)) {
+    fun onReceiveFileForSafSave(file: File, suggestedName: String, mimeType: String) {
+        appendLog("Siapkan simpan SAF: $suggestedName (${FileUtils.formatBytes(file.length())})")
+        if (suggestedName.endsWith(".img", ignoreCase = true)) {
             viewModelScope.launch(Dispatchers.IO) {
+                val copyDir = File(getApplication<Application>().cacheDir, "last_edited").apply { mkdirs() }
+                val copyFile = File(copyDir, suggestedName)
+                file.copyTo(copyFile, overwrite = true)
                 val maxSize = _uiState.value.partitionInfo?.sizeBytes
-                val validation = FileUtils.validateMtkLogoFile(cacheCopy, maxSize)
-                val selected = SelectedImageFile(cacheCopy, fileName, validation)
-                _uiState.update { it.copy(lastEditedLogoFile = selected) }
+                val validation = FileUtils.validateMtkLogoFile(copyFile, maxSize)
+                _uiState.update {
+                    it.copy(lastEditedLogoFile = SelectedImageFile(copyFile, suggestedName, validation))
+                }
             }
         }
+        _events.tryEmit(
+            UiEvent.PromptSafSave(
+                sourceFile = file,
+                suggestedName = suggestedName,
+                mimeType = mimeType,
+                deleteAfterSave = true
+            )
+        )
     }
 
-    fun onReceiveEditedLogoFromBridge(file: File) {
-        viewModelScope.launch(Dispatchers.IO) {
+    fun onReceiveEditedLogoForFlash(file: File) {
+        viewModelScope.launch {
             val maxSize = _uiState.value.partitionInfo?.sizeBytes
-            val validation = FileUtils.validateMtkLogoFile(file, maxSize)
+            val validation = withContext(Dispatchers.IO) {
+                FileUtils.validateMtkLogoFile(file, maxSize)
+            }
             val selected = SelectedImageFile(file, file.name, validation)
+            val copy = AppStrings.forLang(_uiState.value.language)
+            val isRoot = _uiState.value.isRootAvailable
             _uiState.update {
                 it.copy(
                     lastEditedLogoFile = selected,
-                    selectedFlashFile = selected,
+                    pendingFlashFile = selected,
+                    lastFlashResult = null,
                     activeTab = MainTab.ROOT
                 )
             }
-            appendLog("Menerima hasil edit dari editor: ${file.name} (${FileUtils.formatBytes(file.length())}, SHA-256: ${validation.sha256.take(12)}...)")
+            appendLog(
+                "File hasil edit diterima: ${file.name} (${FileUtils.formatBytes(file.length())}, SHA-256: ${validation.sha256.take(12)}...)"
+            )
+            _events.emit(UiEvent.ScrollToFlashCard)
+            if (!isRoot) {
+                _events.emit(UiEvent.ShowMessage(copy.msgFlashReadyNoRoot, isError = true))
+            } else if (!validation.isValid) {
+                _events.emit(UiEvent.ShowMessage(validation.errorReason ?: "File tidak valid", isError = true))
+            } else {
+                _events.emit(UiEvent.ShowMessage(copy.msgFlashReady))
+            }
         }
     }
 
@@ -257,7 +312,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val state = _uiState.value
         if (state.isBusy) return
         if (!state.isRootAvailable || state.partitionInfo == null) {
-            _events.tryEmit(UiEvent.ShowMessage("Root atau partisi logo belum tersedia. Cek tab Root Tool."))
+            _events.tryEmit(UiEvent.ShowMessage("Root atau partisi logo belum tersedia. Cek tab Root Tool.", isError = true))
             _uiState.update { it.copy(activeTab = MainTab.ROOT) }
             return
         }
@@ -273,30 +328,39 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.update { it.copy(isBusy = true) }
             try {
                 val res = withContext(Dispatchers.IO) {
-                    rootManager.dumpLogo(info, slotTarget, trim) { msg -> appendLog(msg) }
+                    rootManager.dumpLogoToCache(info, slotTarget, trim) { msg -> appendLog(msg) }
                 }
                 res.onSuccess { dump ->
                     val validation = withContext(Dispatchers.IO) {
                         FileUtils.validateMtkLogoFile(dump.cacheFile, info.sizeBytes)
                     }
-                    val sel = SelectedImageFile(dump.cacheFile, dump.cacheFile.name, validation)
+                    val sel = SelectedImageFile(dump.cacheFile, dump.suggestedName, validation)
                     _uiState.update {
                         it.copy(
                             lastDumpResult = dump,
-                            selectedFlashFile = it.selectedFlashFile ?: sel
+                            pendingFlashFile = it.pendingFlashFile ?: sel
                         )
                     }
                     if (openInEditorAfter) {
                         _uiState.update { it.copy(activeTab = MainTab.EDITOR) }
                         _events.emit(
                             UiEvent.InjectToWebView(
-                                WebInjectPayload("logo", dump.cacheFile.name, dump.cacheFile)
+                                WebInjectPayload("logo", dump.suggestedName, dump.cacheFile)
+                            )
+                        )
+                    } else {
+                        _events.emit(
+                            UiEvent.PromptSafSave(
+                                sourceFile = dump.cacheFile,
+                                suggestedName = dump.suggestedName,
+                                mimeType = "application/octet-stream",
+                                deleteAfterSave = false // keep cache copy for "Buka di editor"
                             )
                         )
                     }
                 }.onFailure { err ->
                     appendLog("GAGAL dump: ${err.message}")
-                    _events.emit(UiEvent.ShowMessage(err.message ?: "Dump gagal"))
+                    _events.emit(UiEvent.ShowMessage(err.message ?: "Dump gagal", isError = true))
                 }
             } finally {
                 _uiState.update { it.copy(isBusy = false) }
@@ -304,12 +368,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun saveLastDumpViaSaf() {
+        val dump = _uiState.value.lastDumpResult ?: return
+        _events.tryEmit(
+            UiEvent.PromptSafSave(
+                sourceFile = dump.cacheFile,
+                suggestedName = dump.suggestedName,
+                mimeType = "application/octet-stream",
+                deleteAfterSave = false
+            )
+        )
+    }
+
     fun openLastDumpInEditor() {
         val dump = _uiState.value.lastDumpResult ?: return
         _uiState.update { it.copy(activeTab = MainTab.EDITOR) }
         _events.tryEmit(
             UiEvent.InjectToWebView(
-                WebInjectPayload("logo", dump.cacheFile.name, dump.cacheFile)
+                WebInjectPayload("logo", dump.suggestedName, dump.cacheFile)
             )
         )
     }
@@ -328,7 +404,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     val validation = FileUtils.validateMtkLogoFile(target, maxSize)
                     SelectedImageFile(target, name, validation)
                 }
-                _uiState.update { it.copy(selectedFlashFile = selected, lastFlashResult = null) }
+                _uiState.update { it.copy(pendingFlashFile = selected, lastFlashResult = null) }
                 if (selected.validation.isValid) {
                     appendLog("File dipilih: ${selected.displayName} (${FileUtils.formatBytes(selected.validation.sizeBytes)}, SHA-256: ${selected.validation.sha256.take(12)}...)")
                 } else {
@@ -348,7 +424,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val maxSize = _uiState.value.partitionInfo?.sizeBytes
             val revalidated = FileUtils.validateMtkLogoFile(edited.file, maxSize)
             val updated = edited.copy(validation = revalidated)
-            _uiState.update { it.copy(selectedFlashFile = updated, lastFlashResult = null) }
+            _uiState.update { it.copy(pendingFlashFile = updated, lastFlashResult = null) }
             appendLog("Memakai hasil edit terakhir: ${updated.displayName}")
         }
     }
@@ -356,7 +432,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun executeFlash() {
         val state = _uiState.value
         val info = state.partitionInfo ?: return
-        val selected = state.selectedFlashFile ?: return
+        val selected = state.pendingFlashFile ?: return
         if (!selected.validation.isValid) return
 
         val slotTarget = if (info.isAbDevice && state.flashBothSlots) {
@@ -381,7 +457,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     refreshBackups()
                 }.onFailure { err ->
                     appendLog("FLASH DIBATALKAN/GAGAL: ${err.message}")
-                    _events.emit(UiEvent.ShowMessage(err.message ?: "Flash gagal"))
+                    _events.emit(UiEvent.ShowMessage(err.message ?: "Flash gagal", isError = true))
                 }
             } finally {
                 _uiState.update { it.copy(isBusy = false) }
@@ -421,7 +497,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     refreshBackups()
                 }.onFailure { err ->
                     appendLog("GAGAL backup: ${err.message}")
-                    _events.emit(UiEvent.ShowMessage(err.message ?: "Backup gagal"))
+                    _events.emit(UiEvent.ShowMessage(err.message ?: "Backup gagal", isError = true))
                 }
             } finally {
                 _uiState.update { it.copy(isBusy = false) }
@@ -455,7 +531,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     refreshBackups()
                 }.onFailure { err ->
                     appendLog("GAGAL impor backup: ${err.message}")
-                    _events.emit(UiEvent.ShowMessage(err.message ?: "Impor gagal"))
+                    _events.emit(UiEvent.ShowMessage(err.message ?: "Impor gagal", isError = true))
                 }
             } finally {
                 _uiState.update { it.copy(isBusy = false) }
@@ -475,7 +551,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     _uiState.update { it.copy(lastFlashResult = flashRes) }
                 }.onFailure { err ->
                     appendLog("GAGAL restore: ${err.message}")
-                    _events.emit(UiEvent.ShowMessage(err.message ?: "Restore gagal"))
+                    _events.emit(UiEvent.ShowMessage(err.message ?: "Restore gagal", isError = true))
                 }
             } finally {
                 _uiState.update { it.copy(isBusy = false) }
@@ -502,18 +578,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun exportBackupToDownloads(backup: BackupEntry) {
+    fun exportBackupViaSaf(backup: BackupEntry) {
+        val app = getApplication<Application>()
         viewModelScope.launch {
             _uiState.update { it.copy(isBusy = true) }
             try {
-                val res = withContext(Dispatchers.IO) {
-                    rootManager.backupStore.exportBackupToDownloads(backup)
+                val copied = withContext(Dispatchers.IO) {
+                    val dest = File(app.cacheDir, "export_tmp/${backup.fileName}")
+                    rootManager.backupStore.copyBackupToCache(backup, dest)
                 }
-                res.onSuccess { path ->
-                    appendLog("Backup diekspor ke: $path")
-                    _events.emit(UiEvent.ShowMessage("Tersimpan di $path"))
+                copied.onSuccess { file ->
+                    _events.emit(
+                        UiEvent.PromptSafSave(
+                            sourceFile = file,
+                            suggestedName = backup.fileName,
+                            mimeType = "application/octet-stream",
+                            deleteAfterSave = true
+                        )
+                    )
                 }.onFailure { err ->
                     appendLog("GAGAL ekspor backup: ${err.message}")
+                    _events.emit(UiEvent.ShowMessage(err.message ?: "Ekspor gagal", isError = true))
                 }
             } finally {
                 _uiState.update { it.copy(isBusy = false) }
@@ -562,116 +647,78 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun buildFlashableZip() {
-        val app = getApplication<Application>()
-        val selected = _uiState.value.selectedFlashFile
-            ?: _uiState.value.lastEditedLogoFile
-            ?: _uiState.value.lastDumpResult?.let {
-                SelectedImageFile(
-                    it.cacheFile,
-                    it.cacheFile.name,
-                    FileUtils.validateMtkLogoFile(it.cacheFile)
-                )
-            }
-        if (selected == null || !selected.validation.isValid) {
-            _events.tryEmit(UiEvent.ShowMessage("Pilih file .img MTK yang valid terlebih dahulu."))
-            return
-        }
+    fun startNativeBootAnimation(optionsJson: String): String {
+        val videoUri = lastPickedVideoUri ?: return "ERR_FALLBACK: video URI tidak tersedia"
+        val json = runCatching { JSONObject(optionsJson) }.getOrNull()
+            ?: return "ERR_FALLBACK: JSON opsi tidak valid"
 
-        val withBackup = _uiState.value.zipWithBackup
-        viewModelScope.launch {
-            _uiState.update { it.copy(isBusy = true) }
-            try {
-                val outName = "flash_logo_${FileUtils.timestamp()}.zip"
-                val cacheZip = File(app.cacheDir, "zips/$outName")
-                val savedPath = withContext(Dispatchers.IO) {
-                    ZipBuilder.createFlashableLogoZip(selected.file, cacheZip, withBackup)
-                    FileUtils.saveFileToPublicDownloads(app, cacheZip, outName, "application/zip")
-                }
-                _uiState.update { it.copy(lastZipPath = savedPath, lastZipCacheFile = cacheZip) }
-                appendLog("Flashable ZIP dibuat (${if (withBackup) "dengan backup" else "tanpa backup"}): $savedPath")
-            } catch (t: Throwable) {
-                appendLog("GAGAL buat flashable zip: ${t.message}")
-                _events.emit(UiEvent.ShowMessage(t.message ?: "Gagal membuat ZIP"))
-            } finally {
-                _uiState.update { it.copy(isBusy = false) }
-            }
-        }
-    }
-
-    fun saveRawImg() {
-        val app = getApplication<Application>()
-        val activeImg = resolveActiveRawImage()
-        if (activeImg == null) {
-            _events.tryEmit(UiEvent.ShowMessage("Belum ada file .img aktif."))
-            return
-        }
-        viewModelScope.launch {
-            val name = activeImg.displayName.ifBlank { "logo_${FileUtils.timestamp()}.img" }
-            val savedPath = withContext(Dispatchers.IO) {
-                FileUtils.saveFileToPublicDownloads(app, activeImg.file, name, "application/octet-stream")
-            }
-            appendLog("File .img disimpan ke: $savedPath")
-            _events.emit(UiEvent.PromptSaveDocument(activeImg.file, name, "application/octet-stream"))
-        }
-    }
-
-    fun shareRawImg() {
-        val activeImg = resolveActiveRawImage()
-        if (activeImg == null) {
-            _events.tryEmit(UiEvent.ShowMessage("Belum ada file .img aktif."))
-            return
-        }
-        _events.tryEmit(UiEvent.ShareFile(activeImg.file, activeImg.displayName, "application/octet-stream"))
-    }
-
-    private fun resolveActiveRawImage(): SelectedImageFile? {
-        return _uiState.value.selectedFlashFile
-            ?: _uiState.value.lastEditedLogoFile
-            ?: _uiState.value.lastDumpResult?.let {
-                SelectedImageFile(
-                    it.cacheFile,
-                    it.cacheFile.name,
-                    FileUtils.validateMtkLogoFile(it.cacheFile)
-                )
-            }
-    }
-
-    fun findDeviceBootAnimation(sendImmediately: Boolean) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isBusy = true) }
-            try {
-                val res = withContext(Dispatchers.IO) {
-                    rootManager.findAndLoadBootAnimation { msg -> appendLog(msg) }
-                }
-                res.onSuccess { found ->
-                    _uiState.update { it.copy(bootAnimResult = found) }
-                    if (sendImmediately) {
-                        _uiState.update { it.copy(activeTab = MainTab.EDITOR) }
-                        _events.emit(
-                            UiEvent.InjectToWebView(
-                                WebInjectPayload("bootanim", "bootanimation.zip", found.cacheFile)
-                            )
-                        )
-                    }
-                }.onFailure { err ->
-                    appendLog("Bootanimation: ${err.message}")
-                    _events.emit(UiEvent.ShowMessage(err.message ?: "Tidak ditemukan"))
-                }
-            } finally {
-                _uiState.update { it.copy(isBusy = false) }
-            }
-        }
-    }
-
-    fun sendFoundBootAnimToEditor() {
-        val found = _uiState.value.bootAnimResult ?: return
-        _uiState.update { it.copy(activeTab = MainTab.EDITOR) }
-        _events.tryEmit(
-            UiEvent.InjectToWebView(
-                WebInjectPayload("bootanim", "bootanimation.zip", found.cacheFile)
-            )
+        val opts = NativeBootAnimOptions(
+            width = json.optInt("width", 720).coerceAtLeast(16),
+            height = json.optInt("height", 1600).coerceAtLeast(16),
+            fps = json.optInt("fps", 20).coerceIn(1, 60),
+            secs = json.optDouble("secs", 6.0).coerceAtLeast(0.5),
+            fitMode = json.optString("fitMode", "cover"),
+            partName = json.optString("partName", "part0").ifBlank { "part0" }
         )
+
+        val app = getApplication<Application>()
+        viewModelScope.launch {
+            _events.emit(UiEvent.SetKeepScreenOn(true))
+            try {
+                val outZip = File(app.cacheDir, "pending_save/bootanim_module.zip")
+                val res = withContext(Dispatchers.IO) {
+                    VideoFrameExtractor.buildBootAnimationModule(
+                        context = app,
+                        videoUri = videoUri,
+                        options = opts,
+                        originalBootAnimZip = null,
+                        outModuleZip = outZip,
+                        onProgress = { cur, tot ->
+                            _events.tryEmit(
+                                UiEvent.EvalWebJs("window.onNativeProgress && window.onNativeProgress($cur, $tot);")
+                            )
+                        }
+                    )
+                }
+                val payload = JSONObject().apply {
+                    put("ok", true)
+                    put("frameCount", res.frameCount)
+                    put("decodeMs", res.decodeMs)
+                    put("drawMs", res.drawMs)
+                    put("encodeMs", res.encodeMs)
+                    put("zipMs", res.zipMs)
+                    put("totalMs", res.totalMs)
+                    put("usedFallback", res.usedFallback)
+                }
+                _events.emit(
+                    UiEvent.EvalWebJs(
+                        "window.onNativeBootAnimDone && window.onNativeBootAnimDone(${JSONObject.quote(payload.toString())});"
+                    )
+                )
+                _events.emit(
+                    UiEvent.PromptSafSave(
+                        sourceFile = outZip,
+                        suggestedName = "bootanim_module.zip",
+                        mimeType = "application/zip",
+                        deleteAfterSave = true
+                    )
+                )
+            } catch (t: Throwable) {
+                appendLog("Native bootanim fallback ke JS: ${t.message}")
+                val payload = JSONObject().apply {
+                    put("ok", false)
+                    put("error", t.message ?: "Native extraction failed")
+                }
+                _events.emit(
+                    UiEvent.EvalWebJs(
+                        "window.onNativeBootAnimDone && window.onNativeBootAnimDone(${JSONObject.quote(payload.toString())});"
+                    )
+                )
+            } finally {
+                _events.emit(UiEvent.SetKeepScreenOn(false))
+            }
+        }
+        return "STARTED"
     }
 
     suspend fun streamFileToWebView(
@@ -684,7 +731,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             evalJs("window.__ltBeginReceive && window.__ltBeginReceive('$safeKind', '$safeName');")
         }
         withContext(Dispatchers.IO) {
-            val buf = ByteArray(196608) // multiple of 3 bytes for clean base64 chunks
+            val buf = ByteArray(196608)
             FileInputStream(payload.file).use { fis ->
                 while (true) {
                     val n = fis.read(buf)

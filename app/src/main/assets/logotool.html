@@ -20,15 +20,16 @@ body{margin:0;padding:0 0 32px;min-height:100vh;background:var(--bg);color:var(-
 ::selection{background:color-mix(in srgb,var(--accent) 30%,transparent)}
 .wrap{max-width:1040px;margin:auto;padding-left:16px;padding-right:16px}
 .ic{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.hd{display:flex;align-items:flex-start;gap:12px;padding-top:20px;padding-bottom:14px}
-.logo{width:46px;height:46px;flex:none;border-radius:14px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 10px 20px -10px var(--accent)}
-.logo .ic{width:26px;height:26px}
+.hd{display:flex;align-items:flex-start;gap:10px;padding-top:16px;padding-bottom:14px}
+.logo{width:44px;height:44px;flex:none;border-radius:14px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 10px 20px -10px var(--accent)}
+.logo .ic{width:24px;height:24px}
 .ttl{flex:1;min-width:0}
-h1{margin:0;font-size:1.3rem;font-weight:800;letter-spacing:-.02em;line-height:1.2}
+h1{margin:0;font-size:1.25rem;font-weight:800;letter-spacing:-.02em;line-height:1.2}
 .sub{margin:3px 0 8px;color:var(--mute);font-size:13px}
 .badge{display:inline-flex;align-items:center;gap:7px;padding:4px 11px;border-radius:999px;font-size:12px;font-weight:700;color:var(--accent);background:color-mix(in srgb,var(--accent) 11%,transparent);border:1px solid color-mix(in srgb,var(--accent) 28%,transparent)}
 .badge i{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px color-mix(in srgb,currentColor 25%,transparent)}
-.ib{flex:none;width:42px;height:42px;display:grid;place-items:center;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;box-shadow:var(--sh)}
+.hd-acts{display:flex;gap:8px;flex:none}
+.ib{flex:none;min-width:42px;height:42px;padding:0 10px;display:grid;place-items:center;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;box-shadow:var(--sh);font:inherit;font-size:12px;font-weight:800}
 :root[data-theme=dark] .mo,:root:not([data-theme=dark]) .su{display:none}
 .seg{position:relative;display:grid;grid-template-columns:1fr 1fr;padding:4px;margin:4px 0 14px;border-radius:16px;background:var(--chip);border:1px solid var(--line)}
 .seg::before{content:"";position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:12px;background:var(--surface);box-shadow:var(--sh);transition:transform .28s cubic-bezier(.4,0,.2,1)}
@@ -36,19 +37,26 @@ h1{margin:0;font-size:1.3rem;font-weight:800;letter-spacing:-.02em;line-height:1
 .tab{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:8px 10px;border:0;border-radius:12px;background:none;color:var(--mute);font:inherit;font-size:13px;font-weight:700;line-height:1.25;cursor:pointer;text-align:left}
 .tab[aria-selected=true]{color:var(--ink)}
 .tab[aria-selected=true] .ic{color:var(--accent)}
-#st{position:sticky;top:8px;z-index:5;display:flex;align-items:flex-start;gap:10px;margin:0 0 14px;padding:12px 14px 12px 18px;border-radius:14px;border:1px solid var(--line);background:var(--surface);box-shadow:var(--sh);overflow:hidden;--c:var(--mute)}
+#st{position:sticky;top:8px;z-index:5;display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:10px 10px 10px 16px;border-radius:14px;border:1px solid var(--line);background:var(--surface);box-shadow:var(--sh);overflow:hidden;--c:var(--mute);opacity:1;transition:opacity .28s ease,transform .28s ease}
+#st.fade-out{opacity:0;transform:translateY(-4px);pointer-events:none}
 #st::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c)}
 #st[data-s=busy]{--c:var(--accent)}#st[data-s=ok]{--c:var(--ok)}#st[data-s=warn]{--c:var(--warn)}#st[data-s=err]{--c:var(--err)}
-#st .ic{display:none;color:var(--c);margin-top:1px}
+#st .ic{display:none;color:var(--c)}
 #st[data-s=idle] [data-k=idle],#st[data-s=busy] [data-k=busy],#st[data-s=ok] [data-k=ok],#st[data-s=warn] [data-k=warn],#st[data-s=err] [data-k=err]{display:block}
 #st[data-s=busy] [data-k=busy]{animation:sp 1s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 #log{flex:1;min-width:0;font-size:13.5px;word-break:break-word;font-variant-numeric:tabular-nums}
-#log:empty::after{content:"Siap. Pilih alat di atas lalu muat file untuk mulai.";color:var(--mute)}
-#pg{position:absolute;left:0;bottom:0;height:3px;width:0;background:var(--accent);transition:width .2s}
-#out{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:14px 16px;border-radius:16px;font-size:14px;font-weight:600;color:var(--on);background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 14px 28px -14px var(--accent);word-break:break-word}
-#out::before{content:"";flex:none;width:30px;height:30px;background:currentColor;-webkit-mask:var(--chk) center/contain no-repeat;mask:var(--chk) center/contain no-repeat}
+.xbtn{flex:none;width:28px;height:28px;border:0;border-radius:8px;background:transparent;color:var(--mute);font-size:18px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.xbtn:hover{background:color-mix(in srgb,var(--ink) 8%,transparent);color:var(--ink)}
+#pg{position:absolute;left:0;bottom:0;height:3px;width:0;background:var(--accent);transition:width .12s}
+#out{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:12px 14px;border-radius:16px;font-size:14px;font-weight:600;color:var(--on);background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 14px 28px -14px var(--accent);word-break:break-word;transition:opacity .28s ease}
+#out.fade-out{opacity:0;pointer-events:none}
+#out::before{content:"";flex:none;width:26px;height:26px;background:currentColor;-webkit-mask:var(--chk) center/contain no-repeat;mask:var(--chk) center/contain no-repeat}
+#out .out-txt{flex:1;min-width:0}
 #out a{color:inherit;font-weight:800;text-decoration:underline;text-underline-offset:3px}
+#out .xbtn{color:var(--on)}
+.info-pill{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:var(--soft);border:1px solid var(--line);font-size:12.5px;color:var(--ink);font-variant-numeric:tabular-nums}
+.prof-line{margin:10px 0 0;padding:8px 10px;border-radius:10px;background:var(--soft);border:1px solid var(--line);font-size:12px;color:var(--mute);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
 .cols{display:grid;gap:14px;align-items:start;animation:in .28s ease}
 @keyframes in{from{opacity:0;transform:translateY(6px)}}
 @media(min-width:900px){.cols{grid-template-columns:minmax(0,420px) minmax(0,1fr)}}
@@ -76,7 +84,7 @@ input[type=text]:focus,select:focus{outline:0;border-color:var(--accent);box-sha
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:46px;margin:0 0 8px;padding:10px 14px;border:0;border-radius:12px;background:var(--accent);color:var(--on);font:inherit;font-weight:700;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 10px 20px -12px var(--accent);transition:transform .12s,filter .12s}
 .btn.t{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 32%,transparent)}
 .btn:hover{filter:brightness(1.07)}.btn:active{transform:translateY(1px)}.btn:last-child{margin-bottom:0}
-.btn:focus-visible,.tab:focus-visible,.ib:focus-visible,summary:focus-visible,#imgs .b:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.btn:disabled{opacity:.55;cursor:not-allowed}
 .ck{display:flex;align-items:flex-start;gap:10px;margin:0 0 10px;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--soft);font-size:13px;cursor:pointer}
 .ck input{flex:none;width:18px;height:18px;margin:1px 0 0;accent-color:var(--accent)}
 details{margin:0 0 10px;padding:0 14px;border-radius:14px;border:1px solid var(--line);background:var(--soft)}
@@ -88,7 +96,7 @@ details[open] summary::after{transform:rotate(180deg)}
 .row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 #imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
 #imgs:empty{display:block}
-#imgs:empty::before{content:"Belum ada gambar. Muat logo.img untuk melihat pratinjau di sini.";display:block;padding:44px 14px;text-align:center;color:var(--mute);border:1.5px dashed var(--line);border-radius:14px}
+#imgs:empty::before{content:attr(data-empty);display:block;padding:44px 14px;text-align:center;color:var(--mute);border:1.5px dashed var(--line);border-radius:14px}
 #imgs .c{display:flex;flex-direction:column;margin:0;padding:8px;border-radius:14px;border:1px solid var(--line);background:var(--soft);font-size:12px;font-weight:800;transition:transform .15s,border-color .15s}
 #imgs .c:hover{transform:translateY(-2px);border-color:var(--accent)}
 .idx{align-self:flex-start;padding:2px 9px;border-radius:999px;font-size:11px;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);font-variant-numeric:tabular-nums}
@@ -97,10 +105,6 @@ details[open] summary::after{transform:rotate(180deg)}
 #imgs .b::before{content:"";width:14px;height:14px;background:currentColor;-webkit-mask:var(--swp) center/contain no-repeat;mask:var(--swp) center/contain no-repeat}
 #imgs .b:hover{background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
 footer{margin-top:24px;padding-top:18px;border-top:1px solid var(--line);text-align:center;color:var(--mute);font-size:12.5px}
-::view-transition-group(root),::view-transition-image-pair(root),::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
-::view-transition-new(root){will-change:clip-path}
-:root.vt *{transition:none!important}
-:root.tt *{transition:background-color .35s,color .35s,border-color .35s!important}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style></head><body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -123,191 +127,688 @@ footer{margin-top:24px;padding-top:18px;border-top:1px solid var(--line);text-al
 
 <header class="wrap hd">
  <div class="logo"><svg class="ic"><use href="#i-chip"/></svg></div>
- <div class="ttl"><h1>Boot animation loader</h1>
-  <p class="sub">Edit logo boot MTK (logo.img) &amp; buat boot animation. Jalan offline, tidak ada yang diunggah.</p>
-  <span class="badge"><i></i>100% Offline &bull; Client-Side</span></div>
- <button class="ib" id="tg" type="button" aria-label="Ganti tema Dark/Light" title="Ganti tema"><svg class="ic su"><use href="#i-sun"/></svg><svg class="ic mo"><use href="#i-moon"/></svg></button>
+ <div class="ttl"><h1 data-i18n="appTitle">Boot animation loader</h1>
+  <p class="sub" data-i18n="appSub">Edit logo boot MTK (logo.img) &amp; buat boot animation. Jalan offline, tidak ada yang diunggah.</p>
+  <span class="badge"><i></i><span data-i18n="badgeOffline">100% Offline • Client-Side</span></span></div>
+ <div class="hd-acts">
+  <button class="ib" id="lg" type="button" aria-label="ID / EN">ID</button>
+  <button class="ib" id="tg" type="button" data-i18n-title="toggleTheme" title="Ganti tema"><svg class="ic su"><use href="#i-sun"/></svg><svg class="ic mo"><use href="#i-moon"/></svg></button>
+ </div>
 </header>
 
 <main class="wrap">
  <div class="seg" id="seg" data-a="0" role="tablist">
-  <button class="tab" id="t1" type="button" role="tab" aria-selected="true" aria-controls="p1"><svg class="ic"><use href="#i-img"/></svg><span>1. Edit logo.img</span></button>
-  <button class="tab" id="t2" type="button" role="tab" aria-selected="false" aria-controls="p2" tabindex="-1"><svg class="ic"><use href="#i-film"/></svg><span>2. Video &rarr; Boot Animation</span></button>
+  <button class="tab" id="t1" type="button" role="tab" aria-selected="true" aria-controls="p1"><svg class="ic"><use href="#i-img"/></svg><span data-i18n="tab1">1. Edit logo.img</span></button>
+  <button class="tab" id="t2" type="button" role="tab" aria-selected="false" aria-controls="p2" tabindex="-1"><svg class="ic"><use href="#i-film"/></svg><span data-i18n="tab2">2. Video → Boot Animation</span></button>
  </div>
 
- <div id="st" data-s="idle" role="status" aria-live="polite">
+ <div id="st" data-s="idle" role="status" aria-live="polite" hidden>
   <svg class="ic" data-k="idle"><use href="#i-info"/></svg><svg class="ic" data-k="busy"><use href="#i-spin"/></svg><svg class="ic" data-k="ok"><use href="#i-ok"/></svg><svg class="ic" data-k="warn"><use href="#i-warn"/></svg><svg class="ic" data-k="err"><use href="#i-err"/></svg>
-  <span id="log"></span><i id="pg"></i>
+  <span id="log"></span>
+  <button class="xbtn" id="stx" type="button" aria-label="Close">×</button>
+  <i id="pg"></i>
  </div>
- <div id="out" hidden></div>
+ <div id="out" hidden><span class="out-txt" id="outtxt"></span><button class="xbtn" id="outx" type="button" aria-label="Close">×</button></div>
 
  <section class="cols" id="p1" role="tabpanel" aria-labelledby="t1">
   <div>
-   <div class="card">
-    <h2><span class="num">1</span>Muat logo.img</h2>
-    <div class="note"><svg class="ic"><use href="#i-warn"/></svg><p><b>Wajib:</b> muat logo.img ASLI dari HP-mu dulu. Format, jumlah gambar, resolusi, dan ukuran file dipakai persis agar tidak bootloop.</p></div>
-    <label class="dz"><input type="file" id="lf"><svg class="ic"><use href="#i-up"/></svg><b>Pilih atau seret logo.img ke sini</b><span class="fn">Belum ada file dipilih</span></label>
-    <label class="field"><span>Ukuran manual (opsional, kalau tidak terdeteksi), contoh 1080x2400</span><input type="text" id="sz" placeholder="kosongkan = otomatis"></label>
-    <button class="btn" type="button" onclick="run(loadLogo)"><svg class="ic"><use href="#i-open"/></svg>Muat logo.img</button>
+   <div class="card" id="c-load">
+    <h2><span class="num">1</span><span data-i18n="c1Title">Muat logo.img</span></h2>
+    <div class="note"><svg class="ic"><use href="#i-warn"/></svg><p data-i18n-html="c1Note"><b>Wajib:</b> muat logo.img ASLI dari HP-mu dulu. Format, jumlah gambar, resolusi, dan ukuran file dipakai persis agar tidak bootloop.</p></div>
+    <label class="dz"><input type="file" id="lf"><svg class="ic"><use href="#i-up"/></svg><b data-i18n="dzLogoTitle">Pilih atau seret logo.img ke sini</b><span class="fn" data-i18n="noFile">Belum ada file dipilih</span></label>
+    <label class="field"><span data-i18n="manualSizeLbl">Ukuran manual (opsional, kalau tidak terdeteksi), contoh 1080x2400</span><input type="text" id="sz" data-i18n-placeholder="manualSizePh" placeholder="kosongkan = otomatis"></label>
+    <button class="btn" type="button" onclick="run(loadLogo)"><svg class="ic"><use href="#i-open"/></svg><span data-i18n="btnLoadLogo">Muat logo.img</span></button>
+    <div class="info-pill" id="logo-info" hidden></div>
    </div>
    <div class="card" id="act" hidden>
-    <h2><span class="num">2</span>Ganti &amp; simpan</h2>
-    <label class="field"><span><b>Logo boot</b> (otomatis terdeteksi, biasanya #0). Nomor yang diganti:</span><input type="text" id="bi"></label>
-    <label class="field"><span>Cara pas ke layar:</span><select id="fm"><option value="cover">Isi penuh (tanpa celah, tepi dipotong)</option><option value="contain">Muat semua (ada garis hitam)</option><option value="stretch">Regang (tanpa celah, bisa gepeng)</option></select></label>
-    <span class="lbl">Pilih foto untuk logo boot:</span>
-    <label class="dz"><input type="file" id="all" accept="image/*" onchange="run(()=>repBoot(this.files[0]))"><svg class="ic"><use href="#i-img"/></svg><b>Pilih atau seret foto</b><span class="fn">Belum ada foto dipilih</span></label>
-    <label class="ck"><input type="checkbox" id="trim" checked><span>Potong ukuran file (hanya sebesar isi; sisa partisi tidak diubah)</span></label>
-    <p class="hint">Gambar lain (animasi/ikon pengisian baterai) tidak disentuh. Bisa juga ganti satuan di kotak di bawah.</p>
-    <button class="btn" type="button" onclick="run(async()=>{await dl(build(),'new_logo.img');log('new_logo.img siap')})"><svg class="ic"><use href="#i-dl"/></svg>Simpan new_logo.img</button>
-    <button class="btn t" type="button" onclick="run(flashZip)"><svg class="ic"><use href="#i-pkg"/></svg>Buat zip flash untuk OFOX</button>
+    <h2><span class="num">2</span><span data-i18n="c2Title">Ganti &amp; simpan</span></h2>
+    <label class="field"><span data-i18n-html="bootIdxLbl"><b>Logo boot</b> (otomatis terdeteksi, biasanya #0). Nomor yang diganti:</span><input type="text" id="bi"></label>
+    <label class="field"><span data-i18n="fitModeLbl">Cara pas ke layar:</span><select id="fm"><option value="cover" data-i18n="fitCover">Isi penuh (tanpa celah, tepi dipotong)</option><option value="contain" data-i18n="fitContain">Muat semua (ada garis hitam)</option><option value="stretch" data-i18n="fitStretch">Regang (tanpa celah, bisa gepeng)</option></select></label>
+    <span class="lbl" data-i18n="pickBootPhotoLbl">Pilih foto untuk logo boot:</span>
+    <label class="dz"><input type="file" id="all" accept="image/*" onchange="run(()=>repBoot(this.files[0]))"><svg class="ic"><use href="#i-img"/></svg><b data-i18n="dzPhotoTitle">Pilih atau seret foto</b><span class="fn" data-i18n="noPhoto">Belum ada foto dipilih</span></label>
+    <label class="ck"><input type="checkbox" id="trim" checked><span data-i18n="trimLbl">Potong ukuran file (hanya sebesar isi; sisa partisi tidak diubah)</span></label>
+    <p class="hint" data-i18n="c2Hint">Gambar lain (animasi/ikon pengisian baterai) tidak disentuh. Bisa juga ganti satuan di kotak di bawah.</p>
+    <button class="btn" type="button" onclick="run(async()=>{await dl(build(),'new_logo.img');log(T('logoReady'),'ok')})"><svg class="ic"><use href="#i-dl"/></svg><span data-i18n="btnSaveNewLogo">Simpan new_logo.img</span></button>
+    <button class="btn t" type="button" onclick="run(flashZip)"><svg class="ic"><use href="#i-pkg"/></svg><span data-i18n="btnFlashZip">Buat zip flash untuk OFOX</span></button>
    </div>
   </div>
   <div class="card">
-   <h2>Galeri gambar</h2>
-   <p class="hint">Pratinjau tiap gambar di dalam logo.img. Tekan Ganti untuk mengganti satu gambar saja.</p>
-   <div id="imgs"></div>
+   <h2 data-i18n="galTitle">Galeri gambar</h2>
+   <p class="hint" data-i18n="galHint">Pratinjau tiap gambar di dalam logo.img. Tekan Ganti untuk mengganti satu gambar saja.</p>
+   <div id="imgs" data-empty="Belum ada gambar. Muat logo.img untuk melihat pratinjau di sini."></div>
   </div>
  </section>
 
  <section class="cols" id="p2" role="tabpanel" aria-labelledby="t2" hidden>
   <div class="card">
-   <h2><span class="num">1</span>Video &rarr; Boot Animation</h2>
-   <span class="lbl"><b>Langkah 1:</b> pilih video</span>
-   <label class="dz"><input type="file" id="vid" accept="video/*"><svg class="ic"><use href="#i-film"/></svg><b>Pilih atau seret video</b><span class="fn">Belum ada video dipilih</span></label>
-   <span class="lbl"><b>Langkah 2:</b> tekan tombol</span>
-   <button class="btn" type="button" onclick="run(anim)"><svg class="ic"><use href="#i-play"/></svg>Buat boot animation</button>
-   <p class="hint" style="margin:12px 0 0">Hasilnya <b>bootanim_module.zip</b>. Pasang lewat <b>Magisk &gt; Modul &gt; Install dari penyimpanan</b>, lalu reboot.</p>
+   <h2><span class="num">1</span><span data-i18n="vTitle">Video → Boot Animation</span></h2>
+   <span class="lbl" data-i18n-html="vStep1"><b>Langkah 1:</b> pilih video</span>
+   <label class="dz"><input type="file" id="vid" accept="video/*"><svg class="ic"><use href="#i-film"/></svg><b data-i18n="dzVidTitle">Pilih atau seret video</b><span class="fn" data-i18n="noVideo">Belum ada video dipilih</span></label>
+   <span class="lbl" data-i18n-html="vStep2"><b>Langkah 2:</b> tekan tombol</span>
+   <button class="btn" id="btn-anim" type="button" onclick="run(anim)"><svg class="ic"><use href="#i-play"/></svg><span data-i18n="btnMakeAnim">Buat boot animation</span></button>
+   <div class="note" id="fg-warn" hidden style="margin:10px 0 0"><svg class="ic"><use href="#i-warn"/></svg><p data-i18n="fgKeepWarn">Biarkan aplikasi tetap di layar depan selama proses berlangsung.</p></div>
+   <div class="prof-line" id="vprof" hidden></div>
+   <p class="hint" style="margin:12px 0 0" data-i18n-html="vMagiskHint">Hasilnya <b>bootanim_module.zip</b>. Pasang lewat <b>Magisk &gt; Modul &gt; Install dari penyimpanan</b>, lalu reboot.</p>
   </div>
   <div class="card">
-   <h2>Opsi</h2>
-   <details><summary>Pengaturan (boleh dilewati)</summary>
-    <label class="field"><span>Cara pas ke layar:</span><select id="fm2"><option value="cover">Isi penuh (tanpa celah, tepi dipotong)</option><option value="contain">Muat semua (ada garis hitam)</option><option value="stretch">Regang (tanpa celah, bisa gepeng)</option></select></label>
+   <h2 data-i18n="optsTitle">Opsi</h2>
+   <details><summary data-i18n="optBasic">Pengaturan (boleh dilewati)</summary>
+    <label class="field"><span data-i18n="fitModeLbl">Cara pas ke layar:</span><select id="fm2"><option value="cover" data-i18n="fitCover">Isi penuh (tanpa celah, tepi dipotong)</option><option value="contain" data-i18n="fitContain">Muat semua (ada garis hitam)</option><option value="stretch" data-i18n="fitStretch">Regang (tanpa celah, bisa gepeng)</option></select></label>
     <div class="row3">
-     <label class="field"><span>Ukuran</span><input type="text" id="asz" value="720x1600"></label>
-     <label class="field"><span>FPS</span><input type="text" id="fps" value="20"></label>
-     <label class="field"><span>Durasi (detik)</span><input type="text" id="secs" value="6"></label>
+     <label class="field"><span data-i18n="sizeLbl">Ukuran</span><input type="text" id="asz" value="720x1600"></label>
+     <label class="field"><span data-i18n="fpsLbl">FPS</span><input type="text" id="fps" value="20"></label>
+     <label class="field"><span data-i18n="secsLbl">Durasi (detik)</span><input type="text" id="secs" value="6"></label>
     </div>
    </details>
-   <details><summary>Lanjutan: ganti sebagian saja (boleh dilewati)</summary>
-    <p class="hint">Muat bootanimation.zip asli dari HP (/system/media atau /product/media) supaya hanya satu part yang diganti. Ukuran dan FPS otomatis mengikuti file asli.</p>
-    <label class="dz"><input type="file" id="ba" accept=".zip,application/zip"><svg class="ic"><use href="#i-pkg"/></svg><b>Pilih atau seret bootanimation.zip</b><span class="fn">Belum ada file dipilih</span></label>
-    <button class="btn t" type="button" onclick="run(loadBa)"><svg class="ic"><use href="#i-open"/></svg>Muat bootanimation asli</button>
+   <details><summary data-i18n="optAdv">Lanjutan: ganti sebagian saja (boleh dilewati)</summary>
+    <p class="hint" data-i18n="optAdvHint">Muat bootanimation.zip asli dari HP (/system/media atau /product/media) supaya hanya satu part yang diganti. Ukuran dan FPS otomatis mengikuti file asli.</p>
+    <label class="dz"><input type="file" id="ba" accept=".zip,application/zip"><svg class="ic"><use href="#i-pkg"/></svg><b data-i18n="dzBaTitle">Pilih atau seret bootanimation.zip</b><span class="fn" data-i18n="noFile">Belum ada file dipilih</span></label>
+    <button class="btn t" type="button" onclick="run(loadBa)"><svg class="ic"><use href="#i-open"/></svg><span data-i18n="btnLoadBa">Muat bootanimation asli</span></button>
     <p class="hint" id="bainfo" style="margin:4px 0 12px"></p>
-    <label class="field"><span>Part yang diganti:</span><input type="text" id="pp" placeholder="mis. part0"></label>
+    <label class="field"><span data-i18n="partLbl">Part yang diganti:</span><input type="text" id="pp" data-i18n-placeholder="partPh" placeholder="mis. part0"></label>
    </details>
   </div>
  </section>
 
- <footer>Boot animation loader &middot; Credit: <b>K4T, CLAUDE AI, Jester</b><br>Lisensi MIT &middot; bebas dipakai siapa pun, tolong tetap cantumkan credit.</footer>
+ <footer data-i18n-html="footerHtml">Boot animation loader &middot; Credit: <b>K4T, CLAUDE AI, Jester</b><br>Lisensi MIT &middot; bebas dipakai siapa pun, tolong tetap cantumkan credit.</footer>
 </main>
 
 <script>
-const $=id=>document.getElementById(id),log=m=>$('log').textContent=m;
-const RES=[[1080,2400],[1080,2408],[1080,2460],[720,1600],[720,1612],[720,1560],[720,1520],[1080,2340],[1080,1920],[720,1440],[720,1280],[1440,3200],[1440,3120],[540,960],[480,854],[1200,2640]];
-let hdr,raws=[],fmts=[],origLen=0,hdrDelta=0,origData,origTot=0;
-const crcT=Uint32Array.from({length:256},(_,n)=>{for(let k=0;k<8;k++)n=n&1?0xEDB88320^(n>>>1):n>>>1;return n>>>0});
-const crc=u=>{let c=-1;for(let i=0;i<u.length;i++)c=crcT[(c^u[i])&255]^(c>>>8);return(c^-1)>>>0};
-const hd=(sz,vals)=>{const b=new DataView(new ArrayBuffer(sz));let o=0;for(const[v,n]of vals){n==2?b.setUint16(o,v,true):b.setUint32(o,v,true);o+=n}return b.buffer};
-const enc=s=>new TextEncoder().encode(s);
-function zip(files){const parts=[],cen=[];let off=0;
- for(const f of files){const nb=enc(f.n),c=crc(f.d),L=f.d.length;
-  const lh=hd(30,[[0x04034b50,4],[20,2],[0,2],[0,2],[0,2],[0x21,2],[c,4],[L,4],[L,4],[nb.length,2],[0,2]]);
-  parts.push(lh,nb,f.d);
-  cen.push(hd(46,[[0x02014b50,4],[20,2],[20,2],[0,2],[0,2],[0,2],[0x21,2],[c,4],[L,4],[L,4],[nb.length,2],[0,2],[0,2],[0,2],[0,2],[0,4],[off,4]]),nb);
-  off+=30+nb.length+L}
- let cs=0;for(const x of cen)cs+=x.byteLength||x.length;
- return new Blob([...parts,...cen,hd(22,[[0x06054b50,4],[0,2],[0,2],[files.length,2],[files.length,2],[cs,4],[off,4],[0,2]])])}
-const pipe=async(u,S,f)=>new Uint8Array(await new Response(new Blob([u]).stream().pipeThrough(new S(f||'deflate'))).arrayBuffer());
-const inflate=u=>pipe(u,DecompressionStream),deflate=u=>pipe(u,CompressionStream);
-const u8=async b=>new Uint8Array(await b.arrayBuffer());
-const run=async f=>{try{log('Memproses...');await f()}catch(e){log('GAGAL: '+(e.message||e))}};
-onerror=(m)=>log('Error: '+m);onunhandledrejection=e=>log('Error: '+(e.reason&&e.reason.message||e.reason));
-async function dl(b,n){b=await b;if(!(b instanceof Blob))b=new Blob([b]);
- if(window.Android&&Android.begin){let r=Android.begin(n);if(r.startsWith('ERR'))throw new Error(r);
-  for(let p=0;p<b.size;p+=3145728){const s=await new Promise(q=>{const f=new FileReader();f.onload=()=>q(f.result.split(',')[1]);f.readAsDataURL(b.slice(p,p+3145728))});r=Android.chunk(s);if(r.startsWith('ERR'))throw new Error(r)}
-  r=Android.end();if(r.startsWith('ERR'))throw new Error(r);const o=$('out');o.hidden=false;o.textContent='Tersimpan di: '+r+' ('+(b.size/1048576).toFixed(1)+' MB)';return}const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=n;a.click();
- const o=$('out'),l=document.createElement('a');o.hidden=false;o.innerHTML='';l.href=u;l.download=n;l.textContent='Kalau belum terunduh, tap di sini: '+n+' ('+(b.size/1048576).toFixed(1)+' MB)';o.append(l)}
-const wait=(o,ev,ms=8000)=>new Promise((res,rej)=>{const t=setTimeout(()=>rej(new Error('Timeout '+ev+' - video mungkin tidak didukung browser (coba mp4 H.264)')),ms);o['on'+ev]=()=>{clearTimeout(t);res()};o.onerror=()=>{clearTimeout(t);rej(new Error('Video tidak bisa dibaca browser (coba mp4 H.264)'))}});
+const CUSTOMIZE_SH = `#!/system/bin/sh
 
-function guess(r){const m=$('sz').value.match(/(\d+)\s*x\s*(\d+)/i),c=m?[[+m[1],+m[2]]]:RES;
- for(const[w,h]of c)for(const b of[4,3,2])if(r.length==w*h*b)return{w,h,b};return null}
-function toImg(r,f){const n=f.w*f.h,o=new Uint8ClampedArray(n*4);
- for(let i=0;i<n;i++){let R,G,B;
-  if(f.b==4){B=r[4*i];G=r[4*i+1];R=r[4*i+2]}
-  else if(f.b==3){B=r[3*i];G=r[3*i+1];R=r[3*i+2]}
-  else{const p=r[2*i]|r[2*i+1]<<8;R=(p>>11)*255/31;G=(p>>5&63)*255/63;B=(p&31)*255/31}
-  o[4*i]=R;o[4*i+1]=G;o[4*i+2]=B;o[4*i+3]=255}
- return new ImageData(o,f.w,f.h)}
-function fromImg(d,f){const n=f.w*f.h,p=d.data,o=new Uint8Array(n*f.b);
- for(let i=0;i<n;i++){const R=p[4*i],G=p[4*i+1],B=p[4*i+2];
-  if(f.b==4){o[4*i]=B;o[4*i+1]=G;o[4*i+2]=R;o[4*i+3]=255}
-  else if(f.b==3){o[3*i]=B;o[3*i+1]=G;o[3*i+2]=R}
-  else{const v=(R*31/255|0)<<11|(G*63/255|0)<<5|(B*31/255|0);o[2*i]=v&255;o[2*i+1]=v>>8}}
- return o}
-function fit(s,sw,sh,w,h,m){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
- x.fillStyle='#000';x.fillRect(0,0,w,h);
- if(m=='stretch'){x.drawImage(s,0,0,w,h);return c}
- const k=m=='contain'?Math.min(w/sw,h/sh):Math.max(w/sw,h/sh);
- x.drawImage(s,(w-sw*k)/2,(h-sh*k)/2,sw*k,sh*k);return c}
+ui_print "- Bootanimation auto-path fix (skye)"
 
-async function loadLogo(){const f=$('lf').files[0];if(!f)return log('Pilih logo.img dulu');
- const d=new Uint8Array(await f.arrayBuffer()),v=new DataView(d.buffer);
- if(d.length<600||v.getUint32(0,true)!=0x58881688)return log('Bukan logo.img MTK (magic tidak cocok)');
- hdr=d.slice(0,512);const n=v.getUint32(512,true),tot=v.getUint32(516,true);origLen=d.length;origData=d;origTot=tot;hdrDelta=v.getUint32(4,true)-tot;
- raws=[];fmts=[];$('imgs').innerHTML='';
- try{for(let i=0;i<n;i++){const o=v.getUint32(520+4*i,true),e=i+1<n?v.getUint32(524+4*i,true):tot;
-  const r=await inflate(d.slice(512+o,512+e));raws.push(r);fmts.push(guess(r));show(i)}}
- catch(e){return log('Gagal baca: '+e)}
- const same=[];for(let i=0;i<raws.length;i++){const A=raws[0],B=raws[i];if(A.length!=B.length)continue;let q=1;for(let k=0;k<A.length;k+=3)if(A[k]!=B[k]){q=0;break}if(q)same.push(i)}
- $('bi').value=same.join(',');$('act').hidden=false;const ok=fmts.filter(x=>x).length;
- log(n+' gambar ('+ok+' besar bisa diedit, '+(n-ok)+' kecil dibiarkan), file asli '+(origLen/1048576).toFixed(2)+' MB. Hasil memakai format & ukuran yang sama.')}
-function thumb(r,f,k){const w=f.w/k|0,h=f.h/k|0,o=new Uint8ClampedArray(w*h*4);
- for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=y*k*f.w+x*k;let R,G,B;
-  if(f.b==4){B=r[4*i];G=r[4*i+1];R=r[4*i+2]}else if(f.b==3){B=r[3*i];G=r[3*i+1];R=r[3*i+2]}
-  else{const p=r[2*i]|r[2*i+1]<<8;R=(p>>11)*255/31;G=(p>>5&63)*255/63;B=(p&31)*255/31}
-  const j=4*(y*w+x);o[j]=R;o[j+1]=G;o[j+2]=B;o[j+3]=255}
- return new ImageData(o,w,h)}
-function show(i){const f=fmts[i];if(!f)return;let c=$('c'+i);if(!c){c=document.createElement('div');c.className='c';c.id='c'+i;$('imgs').append(c)}else c.innerHTML='';
- c.append('#'+i);const k=8,cv=document.createElement('canvas');cv.width=f.w/k|0;cv.height=f.h/k|0;cv.style.cssText='width:100%;display:block;margin:4px 0';
- cv.getContext('2d').putImageData(thumb(raws[i],f,k),0,0);c.append(cv);
- const l=document.createElement('label'),inp=document.createElement('input');l.className='b';l.textContent='Ganti';inp.type='file';inp.accept='image/*';inp.hidden=true;inp.onchange=()=>run(()=>rep(i,inp.files[0]));l.append(inp);c.append(l)}
-async function rep(i,file){const f=fmts[i];if(!f||!file)return;
- const bm=await createImageBitmap(file),c=fit(bm,bm.width,bm.height,f.w,f.h,$('fm').value);
- raws[i]=fromImg(c.getContext('2d').getImageData(0,0,f.w,f.h),f);show(i)}
-async function repBoot(file){if(!file)return;const ids=$('bi').value.split(',').map(x=>x.trim()).filter(x=>x!=='').map(Number);
- for(const i of ids){if(!fmts[i])throw new Error('Nomor '+i+' tidak bisa diedit');await rep(i,file)}log('Logo boot diganti: #'+ids.join(', #'))}
-async function build(){if(!raws.length)throw new Error('Muat logo.img asli dulu');
- const comp=[];for(const r of raws)comp.push(await deflate(r));
- const n=comp.length;let cur=8+4*n;const offs=[];for(const c of comp){offs.push(cur);cur+=c.length}
- const tot=512+cur;
- if(tot>origLen)throw new Error('Hasil ('+tot+' byte) lebih besar dari logo asli ('+origLen+' byte). Di-flash bisa rusak/bootloop. Pakai gambar lebih sederhana (warna polos/gradasi) atau gambar asli dibiarkan sebagian.');
- const out=origData.slice(),v=new DataView(out.buffer);
- out.fill(255,512,512+origTot);out.set(hdr);v.setUint32(4,cur+hdrDelta,true);v.setUint32(512,n,true);v.setUint32(516,cur,true);
- offs.forEach((o,i)=>{v.setUint32(520+4*i,o,true);out.set(comp[i],512+o)});
- const m=new DataView(out.buffer);if(m.getUint32(0,true)!=0x58881688)throw new Error('verifikasi: magic salah');
- for(let i=0;i<n;i++){const o=m.getUint32(520+4*i,true),e=i+1<n?m.getUint32(524+4*i,true):m.getUint32(516,true);
-  const r=await inflate(out.slice(512+o,512+e));if(r.length!=raws[i].length)throw new Error('verifikasi gagal gambar '+i)}
- return $('trim').checked?out.slice(0,tot+((512-tot%512)%512)):out}
-</script>
-<script>
-let oba=null;
-async function unzip(u){const v=new DataView(u.buffer,u.byteOffset,u.byteLength);let e=u.length-22;while(e>=0&&v.getUint32(e,true)!=0x06054b50)e--;if(e<0)throw new Error('Bukan file zip');
- const n=v.getUint16(e+10,true);let p=v.getUint32(e+16,true);const out=[];
- for(let i=0;i<n;i++){const m=v.getUint16(p+10,true),cs=v.getUint32(p+20,true),nl=v.getUint16(p+28,true),xl=v.getUint16(p+30,true),cl=v.getUint16(p+32,true),lo=v.getUint32(p+42,true),name=new TextDecoder().decode(u.subarray(p+46,p+46+nl));p+=46+nl+xl+cl;
-  if(name.endsWith('/'))continue;
-  const s=lo+30+v.getUint16(lo+26,true)+v.getUint16(lo+28,true);let d=u.slice(s,s+cs);
-  if(m==8)d=await pipe(d,DecompressionStream,'deflate-raw');else if(m!=0)throw new Error('Jenis kompresi zip tidak didukung');
-  out.push({n:name,d})}
- return out}
-async function loadBa(){const f=$('ba').files[0];if(!f)throw new Error('Pilih bootanimation.zip asli dulu');
- const e=await unzip(new Uint8Array(await f.arrayBuffer())),de=e.find(x=>x.n=='desc.txt');if(!de)throw new Error('desc.txt tidak ada, ini bukan bootanimation.zip');
- const L=new TextDecoder().decode(de.d).split(/\r?\n/).map(x=>x.trim()).filter(Boolean),[W,H,F]=L[0].split(/\s+/).map(Number);
- const parts=[];for(const l of L.slice(1)){const x=l.split(/\s+/);if((x[0]=='p'||x[0]=='c')&&x[3]&&!parts.includes(x[3]))parts.push(x[3])}
- oba=e;$('asz').value=W+'x'+H;$('fps').value=F;$('pp').value=parts[0]||'';
- $('bainfo').textContent='Ukuran '+W+'x'+H+', '+F+' FPS. Part: '+parts.map(p=>p+' ('+e.filter(x=>x.n.startsWith(p+'/')).length+' frame)').join(', ')+'. Isi "Part yang diganti" dengan part animasi logo (biasanya yang pertama).';
- log('bootanimation asli dimuat')}
-async function flashZip(){const img=await build();
- const sh=`#!/sbin/sh
+SRC="$MODPATH/system/product/media/bootanimation.zip"
+TMP="$MODPATH/.bootanimation.zip"
+
+if [ ! -f "$SRC" ]; then
+  ui_print "! bootanimation.zip missing from package, abort"
+  abort "Broken package"
+fi
+
+TARGET=""
+for p in \\
+  /system/media \\
+  /system/product/media \\
+  /product/media \\
+  /system_ext/media \\
+  /odm/media \\
+  /vendor/media \\
+  /system/system/media \\
+  /system/system/product/media
+do
+  if [ -f "$p/bootanimation.zip" ]; then
+    TARGET="$p"
+    break
+  fi
+done
+
+if [ -z "$TARGET" ]; then
+  TARGET="/system/product/media"
+  ui_print "- No existing bootanimation detected, defaulting to $TARGET"
+else
+  ui_print "- Existing bootanimation found at $TARGET"
+fi
+
+REL="\${TARGET#/}"
+case "$REL" in
+  system/system/*) REL="system/\${REL#system/system/}" ;;
+esac
+
+mv -f "$SRC" "$TMP"
+rm -rf "$MODPATH/system"
+mkdir -p "$MODPATH/$REL"
+mv -f "$TMP" "$MODPATH/$REL/bootanimation.zip"
+
+ui_print "- Bootanimation will overlay /$REL/bootanimation.zip"
+ui_print "- Done"
+`;
+
+const I18N = {
+ id: {
+  appTitle: 'Boot animation loader',
+  appSub: 'Edit logo boot MTK (logo.img) & buat boot animation. Jalan offline, tidak ada yang diunggah.',
+  badgeOffline: '100% Offline • Client-Side',
+  toggleTheme: 'Ganti tema',
+  tab1: '1. Edit logo.img',
+  tab2: '2. Video → Boot Animation',
+  c1Title: 'Muat logo.img',
+  c1Note: '<b>Wajib:</b> muat logo.img ASLI dari HP-mu dulu. Format, jumlah gambar, resolusi, dan ukuran file dipakai persis agar tidak bootloop.',
+  dzLogoTitle: 'Pilih atau seret logo.img ke sini',
+  noFile: 'Belum ada file dipilih',
+  manualSizeLbl: 'Ukuran manual (opsional, kalau tidak terdeteksi), contoh 1080x2400',
+  manualSizePh: 'kosongkan = otomatis',
+  btnLoadLogo: 'Muat logo.img',
+  c2Title: 'Ganti & simpan',
+  bootIdxLbl: '<b>Logo boot</b> (otomatis terdeteksi, biasanya #0). Nomor yang diganti:',
+  fitModeLbl: 'Cara pas ke layar:',
+  fitCover: 'Isi penuh (tanpa celah, tepi dipotong)',
+  fitContain: 'Muat semua (ada garis hitam)',
+  fitStretch: 'Regang (tanpa celah, bisa gepeng)',
+  pickBootPhotoLbl: 'Pilih foto untuk logo boot:',
+  dzPhotoTitle: 'Pilih atau seret foto',
+  noPhoto: 'Belum ada foto dipilih',
+  trimLbl: 'Potong ukuran file (hanya sebesar isi; sisa partisi tidak diubah)',
+  c2Hint: 'Gambar lain (animasi/ikon pengisian baterai) tidak disentuh. Bisa juga ganti satuan di kotak di bawah.',
+  btnSaveNewLogo: 'Simpan new_logo.img',
+  btnFlashZip: 'Buat zip flash untuk OFOX',
+  galTitle: 'Galeri gambar',
+  galHint: 'Pratinjau tiap gambar di dalam logo.img. Tekan Ganti untuk mengganti satu gambar saja.',
+  galEmpty: 'Belum ada gambar. Muat logo.img untuk melihat pratinjau di sini.',
+  btnReplace: 'Ganti',
+  vTitle: 'Video → Boot Animation',
+  vStep1: '<b>Langkah 1:</b> pilih video',
+  dzVidTitle: 'Pilih atau seret video',
+  noVideo: 'Belum ada video dipilih',
+  vStep2: '<b>Langkah 2:</b> tekan tombol',
+  btnMakeAnim: 'Buat boot animation',
+  fgKeepWarn: 'Biarkan aplikasi tetap di layar depan selama proses berlangsung.',
+  vMagiskHint: 'Hasilnya <b>bootanim_module.zip</b>. Pasang lewat <b>Magisk &gt; Modul &gt; Install dari penyimpanan</b>, lalu reboot.',
+  optsTitle: 'Opsi',
+  optBasic: 'Pengaturan (boleh dilewati)',
+  sizeLbl: 'Ukuran',
+  fpsLbl: 'FPS',
+  secsLbl: 'Durasi (detik)',
+  optAdv: 'Lanjutan: ganti sebagian saja (boleh dilewati)',
+  optAdvHint: 'Muat bootanimation.zip asli dari HP (/system/media atau /product/media) supaya hanya satu part yang diganti. Ukuran dan FPS otomatis mengikuti file asli.',
+  dzBaTitle: 'Pilih atau seret bootanimation.zip',
+  btnLoadBa: 'Muat bootanimation asli',
+  partLbl: 'Part yang diganti:',
+  partPh: 'mis. part0',
+  footerHtml: 'Boot animation loader &middot; Credit: <b>K4T, CLAUDE AI, Jester</b><br>Lisensi MIT &middot; bebas dipakai siapa pun, tolong tetap cantumkan credit.',
+  processing: 'Memproses...',
+  pickLogoFirst: 'Pilih logo.img dulu',
+  notMtkLogo: 'Bukan logo.img MTK (magic tidak cocok)',
+  readFail: 'Gagal baca: ',
+  logoLoadedToast: 'logo.img berhasil dimuat',
+  logoInfoSummary: '{name} • {n} gambar ({ok} besar bisa diedit, {skip} kecil dibiarkan) • {mb} MB',
+  bootReplaced: 'Logo boot diganti: #{ids}',
+  idxInvalid: 'Nomor {i} tidak bisa diedit',
+  loadOrigFirst: 'Muat logo.img asli dulu',
+  tooBigErr: 'Hasil ({tot} byte) lebih besar dari logo asli ({orig} byte). Di-flash bisa rusak/bootloop. Pakai gambar lebih sederhana atau biarkan sebagian gambar asli.',
+  badMagicVerify: 'verifikasi: magic salah',
+  verifyImgFail: 'verifikasi gagal gambar ',
+  logoReady: 'new_logo.img siap',
+  flashZipReady: 'flash_logo.zip siap',
+  pickBaFirst: 'Pilih bootanimation.zip asli dulu',
+  notZip: 'Bukan file zip',
+  badZipComp: 'Jenis kompresi zip tidak didukung',
+  noDescTxt: 'desc.txt tidak ada, ini bukan bootanimation.zip',
+  baLoaded: 'bootanimation asli dimuat',
+  baInfo: 'Ukuran {w}x{h}, {fps} FPS. Part: {parts}. Isi "Part yang diganti" dengan part animasi logo (biasanya yang pertama).',
+  pickVideoFirst: 'Pilih video dulu',
+  readingVideo: 'Membaca video...',
+  checkVideoParams: 'Cek ukuran (contoh 720x1600), FPS, dan durasi',
+  partNotFound: 'Part "{pn}" tidak ada di bootanimation asli',
+  frameProg: 'Frame {cur}/{tot}',
+  bootAnimReady: 'bootanim_module.zip siap',
+  dlReady: 'Kalau belum terunduh, tap di sini: {name} ({mb} MB)',
+  preparingSave: 'Membuka dialog simpan untuk {name}...',
+  noEditsYet: 'Belum ada hasil edit',
+  btnRootLoad: 'Muat dari HP (Root)',
+  btnRootFlash: 'Flash hasil edit ke HP (Root)',
+  sentToRoot: 'Dikirim ke Root Tool ({mb} MB)'
+ },
+ en: {
+  appTitle: 'Boot animation loader',
+  appSub: 'Edit MTK boot logo (logo.img) & create boot animations. Runs 100% offline, nothing uploaded.',
+  badgeOffline: '100% Offline • Client-Side',
+  toggleTheme: 'Toggle theme',
+  tab1: '1. Edit logo.img',
+  tab2: '2. Video → Boot Animation',
+  c1Title: 'Load logo.img',
+  c1Note: '<b>Required:</b> load the ORIGINAL logo.img from your phone first. Exact format, image count, resolution, and size are preserved to prevent bootloops.',
+  dzLogoTitle: 'Select or drop logo.img here',
+  noFile: 'No file selected',
+  manualSizeLbl: 'Manual resolution (optional if auto-detect fails), e.g. 1080x2400',
+  manualSizePh: 'leave blank = auto',
+  btnLoadLogo: 'Load logo.img',
+  c2Title: 'Replace & save',
+  bootIdxLbl: '<b>Boot logo</b> (auto-detected, usually #0). Indices to replace:',
+  fitModeLbl: 'Screen fit mode:',
+  fitCover: 'Fill screen (no bars, edges cropped)',
+  fitContain: 'Fit inside (letterboxed)',
+  fitStretch: 'Stretch (fill, may distort)',
+  pickBootPhotoLbl: 'Choose photo for boot logo:',
+  dzPhotoTitle: 'Select or drop photo',
+  noPhoto: 'No photo selected',
+  trimLbl: 'Trim file size (payload only; rest of partition left untouched)',
+  c2Hint: 'Other images (charging animation/icons) stay untouched. You can also replace individual items below.',
+  btnSaveNewLogo: 'Save new_logo.img',
+  btnFlashZip: 'Build flashable zip for OFOX',
+  galTitle: 'Image gallery',
+  galHint: 'Preview every image inside logo.img. Tap Replace to swap a single image.',
+  galEmpty: 'No images yet. Load a logo.img to preview images here.',
+  btnReplace: 'Replace',
+  vTitle: 'Video → Boot Animation',
+  vStep1: '<b>Step 1:</b> choose video',
+  dzVidTitle: 'Select or drop video',
+  noVideo: 'No video selected',
+  vStep2: '<b>Step 2:</b> press button',
+  btnMakeAnim: 'Create boot animation',
+  fgKeepWarn: 'Keep the app in the foreground while video processing is running.',
+  vMagiskHint: 'Outputs <b>bootanim_module.zip</b>. Flash via <b>Magisk &gt; Modules &gt; Install from storage</b>, then reboot.',
+  optsTitle: 'Options',
+  optBasic: 'Settings (optional)',
+  sizeLbl: 'Resolution',
+  fpsLbl: 'FPS',
+  secsLbl: 'Duration (sec)',
+  optAdv: 'Advanced: partial replace (optional)',
+  optAdvHint: 'Load your original bootanimation.zip (/system/media or /product/media) to replace only one part. Resolution and FPS match the original automatically.',
+  dzBaTitle: 'Select or drop bootanimation.zip',
+  btnLoadBa: 'Load original bootanimation',
+  partLbl: 'Part to replace:',
+  partPh: 'e.g. part0',
+  footerHtml: 'Boot animation loader &middot; Credit: <b>K4T, CLAUDE AI, Jester</b><br>MIT License &middot; free to use, please keep credits.',
+  processing: 'Processing...',
+  pickLogoFirst: 'Please select a logo.img first',
+  notMtkLogo: 'Not a valid MTK logo.img (magic mismatch)',
+  readFail: 'Read failed: ',
+  logoLoadedToast: 'logo.img loaded successfully',
+  logoInfoSummary: '{name} • {n} images ({ok} large editable, {skip} small kept) • {mb} MB',
+  bootReplaced: 'Boot logo replaced: #{ids}',
+  idxInvalid: 'Index {i} cannot be edited',
+  loadOrigFirst: 'Load original logo.img first',
+  tooBigErr: 'Output ({tot} bytes) exceeds original logo ({orig} bytes). Flashing may corrupt/bootloop. Use a simpler image or keep some original images.',
+  badMagicVerify: 'verification failed: wrong magic',
+  verifyImgFail: 'verification failed for image ',
+  logoReady: 'new_logo.img ready',
+  flashZipReady: 'flash_logo.zip ready',
+  pickBaFirst: 'Select original bootanimation.zip first',
+  notZip: 'Not a zip file',
+  badZipComp: 'Unsupported zip compression method',
+  noDescTxt: 'desc.txt missing; not a valid bootanimation.zip',
+  baLoaded: 'Original bootanimation loaded',
+  baInfo: 'Size {w}x{h}, {fps} FPS. Parts: {parts}. Enter the logo part name below (usually the first one).',
+  pickVideoFirst: 'Please select a video first',
+  readingVideo: 'Reading video...',
+  checkVideoParams: 'Check resolution (e.g. 720x1600), FPS, and duration',
+  partNotFound: 'Part "{pn}" not found in original bootanimation',
+  frameProg: 'Frame {cur}/{tot}',
+  bootAnimReady: 'bootanim_module.zip ready',
+  dlReady: 'If download did not start, tap here: {name} ({mb} MB)',
+  preparingSave: 'Opening save dialog for {name}...',
+  noEditsYet: 'No edits made yet',
+  btnRootLoad: 'Load from Phone (Root)',
+  btnRootFlash: 'Flash edited logo to Phone (Root)',
+  sentToRoot: 'Sent to Root Tool ({mb} MB)'
+ }
+};
+
+let LANG = 'id';
+const $ = id => document.getElementById(id);
+function T(k, vars) {
+  let s = (I18N[LANG] && I18N[LANG][k]) || I18N.id[k] || k;
+  if (vars) for (const [a, b] of Object.entries(vars)) s = s.replaceAll('{' + a + '}', b);
+  return s;
+}
+
+let stTimer = null, outTimer = null;
+function hideStatus() {
+  clearTimeout(stTimer); stTimer = null;
+  const st = $('st');
+  st.classList.add('fade-out');
+  setTimeout(() => { if (st.classList.contains('fade-out')) st.hidden = true; }, 280);
+}
+function hideOut() {
+  clearTimeout(outTimer); outTimer = null;
+  const o = $('out');
+  o.classList.add('fade-out');
+  setTimeout(() => { if (o.classList.contains('fade-out')) o.hidden = true; }, 280);
+}
+
+function log(m, forceState, progressPct) {
+  const st = $('st'), lg = $('log'), pg = $('pg');
+  clearTimeout(stTimer); stTimer = null;
+  if (!m) { hideStatus(); return; }
+  st.hidden = false;
+  st.classList.remove('fade-out');
+  lg.textContent = m;
+
+  let s = forceState;
+  if (!s) {
+    if (/^(GAGAL|Error|Gagal|Not a|Read failed|Output \(|verification)/i.test(m)) s = 'err';
+    else if (/^(Bukan|Pilih|Cek|Please|Select|Belum|No edits)/i.test(m)) s = 'warn';
+    else if (/^(Memproses|Membaca|Processing|Reading|Frame )/i.test(m)) s = 'busy';
+    else s = 'ok';
+  }
+  st.dataset.s = s;
+  if (typeof progressPct === 'number') pg.style.width = Math.max(0, Math.min(100, progressPct)) + '%';
+  else {
+    const pm = m.match(/^Frame (\d+)\/(\d+)/);
+    pg.style.width = pm ? (100 * pm[1] / pm[2]) + '%' : '0%';
+  }
+
+  if (s === 'busy') return; // stays visible only while running
+  const ttl = s === 'err' ? 7000 : 3500;
+  stTimer = setTimeout(hideStatus, ttl);
+}
+
+window.applyTheme = function (mode) {
+  const dark = mode === 'dark';
+  const R = document.documentElement;
+  R.dataset.theme = dark ? 'dark' : 'light';
+  const tc = $('tc');
+  if (tc) tc.content = dark ? '#0B1015' : '#F1F5F9';
+  try { localStorage.setItem('lt-theme', dark ? 'dark' : 'light'); } catch (e) {}
+};
+
+window.setLang = function (lang) {
+  LANG = (lang === 'en') ? 'en' : 'id';
+  document.documentElement.lang = LANG;
+  const lgBtn = $('lg');
+  if (lgBtn) lgBtn.textContent = LANG.toUpperCase();
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = T(el.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    el.innerHTML = T(el.dataset.i18nHtml);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = T(el.dataset.i18nPlaceholder);
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    el.title = T(el.dataset.i18nTitle);
+  });
+  const imgsEl = $('imgs');
+  if (imgsEl) {
+    imgsEl.setAttribute('data-empty', T('galEmpty'));
+    imgsEl.querySelectorAll('.b-lbl').forEach(sp => { sp.textContent = T('btnReplace'); });
+  }
+  const b1 = document.getElementById('btn-root-load-txt');
+  if (b1) b1.textContent = T('btnRootLoad');
+  const b2 = document.getElementById('btn-root-flash-txt');
+  if (b2) b2.textContent = T('btnRootFlash');
+  if (window.__ltLastBaSummary) renderBaInfo();
+  if (window.__ltLastLogoSummary) renderLogoInfo();
+};
+
+const RES = [[1080,2400],[1080,2408],[1080,2460],[720,1600],[720,1612],[720,1560],[720,1520],[1080,2340],[1080,1920],[720,1440],[720,1280],[1440,3200],[1440,3120],[540,960],[480,854],[1200,2640]];
+let hdr, raws = [], fmts = [], origLen = 0, hdrDelta = 0, origData, origTot = 0;
+window.__ltHasEdits = false;
+window.__ltLastLogoSummary = null;
+window.__ltLastBaSummary = null;
+
+function renderLogoInfo() {
+  const info = window.__ltLastLogoSummary, el = $('logo-info');
+  if (!info || !el) return;
+  el.hidden = false;
+  el.textContent = T('logoInfoSummary', info);
+}
+function renderBaInfo() {
+  const b = window.__ltLastBaSummary, el = $('bainfo');
+  if (!b || !el) return;
+  el.textContent = T('baInfo', b);
+}
+
+const crcT = Uint32Array.from({ length: 256 }, (_, n) => {
+  for (let k = 0; k < 8; k++) n = n & 1 ? 0xEDB88320 ^ (n >>> 1) : n >>> 1;
+  return n >>> 0;
+});
+const crc = u => {
+  let c = -1;
+  for (let i = 0; i < u.length; i++) c = crcT[(c ^ u[i]) & 255] ^ (c >>> 8);
+  return (c ^ -1) >>> 0;
+};
+const enc = s => new TextEncoder().encode(s);
+
+function writeU16(b, o, v) { b[o] = v & 255; b[o + 1] = (v >>> 8) & 255; }
+function writeU32(b, o, v) { b[o] = v & 255; b[o + 1] = (v >>> 8) & 255; b[o + 2] = (v >>> 16) & 255; b[o + 3] = (v >>> 24) & 255; }
+
+// Single-allocation STORED ZIP builder (O(n), zero intermediate Blob concat)
+function zip(files) {
+  const meta = [];
+  let dataOff = 0, cdSize = 0;
+  for (const f of files) {
+    const nb = enc(f.n), c = crc(f.d), L = f.d.length;
+    meta.push({ nb, c, L, d: f.d, off: dataOff });
+    dataOff += 30 + nb.length + L;
+    cdSize += 46 + nb.length;
+  }
+  const out = new Uint8Array(dataOff + cdSize + 22);
+  let p = 0;
+  for (const m of meta) {
+    writeU32(out, p, 0x04034b50); writeU16(out, p + 4, 20);
+    writeU16(out, p + 12, 0x21); writeU32(out, p + 14, m.c);
+    writeU32(out, p + 18, m.L); writeU32(out, p + 22, m.L);
+    writeU16(out, p + 26, m.nb.length);
+    out.set(m.nb, p + 30);
+    out.set(m.d, p + 30 + m.nb.length);
+    p += 30 + m.nb.length + m.L;
+  }
+  for (const m of meta) {
+    writeU32(out, p, 0x02014b50); writeU16(out, p + 4, 20); writeU16(out, p + 6, 20);
+    writeU16(out, p + 14, 0x21); writeU32(out, p + 16, m.c);
+    writeU32(out, p + 20, m.L); writeU32(out, p + 24, m.L);
+    writeU16(out, p + 28, m.nb.length); writeU32(out, p + 42, m.off);
+    out.set(m.nb, p + 46);
+    p += 46 + m.nb.length;
+  }
+  writeU32(out, p, 0x06054b50);
+  writeU16(out, p + 8, meta.length); writeU16(out, p + 10, meta.length);
+  writeU32(out, p + 12, cdSize); writeU32(out, p + 16, dataOff);
+  return out;
+}
+
+const pipe = async (u, S, f) => new Uint8Array(await new Response(new Blob([u]).stream().pipeThrough(new S(f || 'deflate'))).arrayBuffer());
+const inflate = u => pipe(u, DecompressionStream), deflate = u => pipe(u, CompressionStream);
+const u8 = async b => b instanceof Uint8Array ? b : new Uint8Array(await b.arrayBuffer());
+const run = async f => { try { log(T('processing'), 'busy'); await f(); } catch (e) { log('Error: ' + (e.message || e), 'err'); } };
+onerror = m => log('Error: ' + m, 'err');
+onunhandledrejection = e => log('Error: ' + (e.reason && e.reason.message || e.reason), 'err');
+
+function bytesToB64Chunk(bytes) {
+  const sub = 0x8000;
+  let out = '';
+  for (let i = 0; i < bytes.length; i += sub) {
+    out += String.fromCharCode.apply(null, bytes.subarray(i, i + sub));
+  }
+  return btoa(out);
+}
+
+window.__ltSendBytesChunked = async function (u8Bytes, finishFn) {
+  const sid = Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7);
+  const step = 393216; // ~512 KB base64 per IPC call
+  const total = Math.max(1, Math.ceil(u8Bytes.length / step));
+  for (let idx = 0; idx < total; idx++) {
+    const start = idx * step;
+    const slice = u8Bytes.subarray(start, Math.min(start + step, u8Bytes.length));
+    const r = AndroidRoot.receiveChunk(sid, idx, total, bytesToB64Chunk(slice));
+    if (r && r.startsWith('ERR')) throw new Error(r);
+  }
+  const res = finishFn(sid);
+  if (res && res.startsWith('ERR')) throw new Error(res);
+};
+
+async function dl(b, n) {
+  b = await b;
+  const bytes = b instanceof Uint8Array ? b : (b instanceof Blob ? await u8(b) : new Uint8Array(b));
+  if (window.AndroidRoot && AndroidRoot.receiveChunk && AndroidRoot.finishSaveTransfer) {
+    const mime = n.endsWith('.zip') ? 'application/zip' : 'application/octet-stream';
+    log(T('preparingSave', { name: n }), 'busy');
+    await window.__ltSendBytesChunked(bytes, sid => AndroidRoot.finishSaveTransfer(sid, n, mime));
+    return;
+  }
+  const blob = new Blob([bytes]);
+  const u = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = u; a.download = n; a.click();
+  const o = $('out'), ot = $('outtxt');
+  clearTimeout(outTimer);
+  o.hidden = false; o.classList.remove('fade-out'); ot.innerHTML = '';
+  const l = document.createElement('a');
+  l.href = u; l.download = n;
+  l.textContent = T('dlReady', { name: n, mb: (bytes.length / 1048576).toFixed(1) });
+  ot.append(l);
+  outTimer = setTimeout(hideOut, 4500);
+}
+
+const wait = (o, ev, ms = 8000) => new Promise((res, rej) => {
+  const t = setTimeout(() => rej(new Error('Timeout ' + ev)), ms);
+  o['on' + ev] = () => { clearTimeout(t); res(); };
+  o.onerror = () => { clearTimeout(t); rej(new Error('Video decode error')); };
+});
+
+function guess(r) {
+  const m = $('sz').value.match(/(\d+)\s*x\s*(\d+)/i), c = m ? [[+m[1], +m[2]]] : RES;
+  for (const [w, h] of c) for (const b of [4, 3, 2]) if (r.length == w * h * b) return { w, h, b };
+  return null;
+}
+function fromImg(d, f) {
+  const n = f.w * f.h, p = d.data, o = new Uint8Array(n * f.b);
+  for (let i = 0; i < n; i++) {
+    const R = p[4 * i], G = p[4 * i + 1], B = p[4 * i + 2];
+    if (f.b == 4) { o[4 * i] = B; o[4 * i + 1] = G; o[4 * i + 2] = R; o[4 * i + 3] = 255; }
+    else if (f.b == 3) { o[3 * i] = B; o[3 * i + 1] = G; o[3 * i + 2] = R; }
+    else { const v = (R * 31 / 255 | 0) << 11 | (G * 63 / 255 | 0) << 5 | (B * 31 / 255 | 0); o[2 * i] = v & 255; o[2 * i + 1] = v >> 8; }
+  }
+  return o;
+}
+function fit(s, sw, sh, w, h, m) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const x = c.getContext('2d');
+  x.fillStyle = '#000'; x.fillRect(0, 0, w, h);
+  if (m == 'stretch') { x.drawImage(s, 0, 0, w, h); return c; }
+  const k = m == 'contain' ? Math.min(w / sw, h / sh) : Math.max(w / sw, h / sh);
+  x.drawImage(s, (w - sw * k) / 2, (h - sh * k) / 2, sw * k, sh * k);
+  return c;
+}
+
+async function loadLogo() {
+  const f = $('lf').files[0];
+  if (!f) return log(T('pickLogoFirst'), 'warn');
+  const d = new Uint8Array(await f.arrayBuffer()), v = new DataView(d.buffer);
+  if (d.length < 600 || v.getUint32(0, true) != 0x58881688) return log(T('notMtkLogo'), 'err');
+  hdr = d.slice(0, 512);
+  const n = v.getUint32(512, true), tot = v.getUint32(516, true);
+  origLen = d.length; origData = d; origTot = tot; hdrDelta = v.getUint32(4, true) - tot;
+  raws = []; fmts = []; $('imgs').innerHTML = ''; window.__ltHasEdits = false;
+  try {
+    for (let i = 0; i < n; i++) {
+      const o = v.getUint32(520 + 4 * i, true), e = i + 1 < n ? v.getUint32(524 + 4 * i, true) : tot;
+      const r = await inflate(d.slice(512 + o, 512 + e));
+      raws.push(r); fmts.push(guess(r)); show(i);
+    }
+  } catch (e) { return log(T('readFail') + e, 'err'); }
+  const same = [];
+  for (let i = 0; i < raws.length; i++) {
+    const A = raws[0], B = raws[i];
+    if (A.length != B.length) continue;
+    let q = 1;
+    for (let k = 0; k < A.length; k += 3) if (A[k] != B[k]) { q = 0; break; }
+    if (q) same.push(i);
+  }
+  $('bi').value = same.join(','); $('act').hidden = false;
+  const ok = fmts.filter(x => x).length;
+  window.__ltLastLogoSummary = { name: f.name, n, ok, skip: n - ok, mb: (origLen / 1048576).toFixed(2) };
+  renderLogoInfo();
+  log(T('logoLoadedToast'), 'ok');
+}
+
+function thumb(r, f, k) {
+  const w = f.w / k | 0, h = f.h / k | 0, o = new Uint8ClampedArray(w * h * 4);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const i = y * k * f.w + x * k; let R, G, B;
+    if (f.b == 4) { B = r[4 * i]; G = r[4 * i + 1]; R = r[4 * i + 2]; }
+    else if (f.b == 3) { B = r[3 * i]; G = r[3 * i + 1]; R = r[3 * i + 2]; }
+    else { const p = r[2 * i] | r[2 * i + 1] << 8; R = (p >> 11) * 255 / 31; G = (p >> 5 & 63) * 255 / 63; B = (p & 31) * 255 / 31; }
+    const j = 4 * (y * w + x); o[j] = R; o[j + 1] = G; o[j + 2] = B; o[j + 3] = 255;
+  }
+  return new ImageData(o, w, h);
+}
+
+function show(i) {
+  const f = fmts[i]; if (!f) return;
+  let c = $('c' + i);
+  if (!c) { c = document.createElement('div'); c.className = 'c'; c.id = 'c' + i; $('imgs').append(c); } else c.innerHTML = '';
+  const idx = document.createElement('span'); idx.className = 'idx'; idx.textContent = '#' + i; c.append(idx);
+  const k = 8, cv = document.createElement('canvas');
+  cv.width = f.w / k | 0; cv.height = f.h / k | 0; cv.style.cssText = 'width:100%;display:block;margin:4px 0';
+  cv.getContext('2d').putImageData(thumb(raws[i], f, k), 0, 0);
+  c.append(cv);
+  const l = document.createElement('label'), sp = document.createElement('span'), inp = document.createElement('input');
+  l.className = 'b'; sp.className = 'b-lbl'; sp.textContent = T('btnReplace');
+  inp.type = 'file'; inp.accept = 'image/*'; inp.hidden = true;
+  inp.onchange = () => run(async () => { await rep(i, inp.files[0]); log(T('bootReplaced', { ids: String(i) }), 'ok'); });
+  l.append(sp, inp); c.append(l);
+}
+
+async function rep(i, file) {
+  const f = fmts[i]; if (!f || !file) return;
+  const bm = await createImageBitmap(file), c = fit(bm, bm.width, bm.height, f.w, f.h, $('fm').value);
+  raws[i] = fromImg(c.getContext('2d').getImageData(0, 0, f.w, f.h), f);
+  window.__ltHasEdits = true;
+  show(i);
+}
+
+async function repBoot(file) {
+  if (!file) return;
+  const ids = $('bi').value.split(',').map(x => x.trim()).filter(x => x !== '').map(Number);
+  for (const i of ids) {
+    if (!fmts[i]) throw new Error(T('idxInvalid', { i }));
+    await rep(i, file);
+  }
+  log(T('bootReplaced', { ids: ids.join(', #') }), 'ok');
+}
+
+async function build() {
+  if (!raws.length) throw new Error(T('loadOrigFirst'));
+  const comp = [];
+  for (const r of raws) comp.push(await deflate(r));
+  const n = comp.length; let cur = 8 + 4 * n; const offs = [];
+  for (const c of comp) { offs.push(cur); cur += c.length; }
+  const tot = 512 + cur;
+  if (tot > origLen) throw new Error(T('tooBigErr', { tot, orig: origLen }));
+  const out = origData.slice(), v = new DataView(out.buffer);
+  out.fill(255, 512, 512 + origTot); out.set(hdr);
+  v.setUint32(4, cur + hdrDelta, true); v.setUint32(512, n, true); v.setUint32(516, cur, true);
+  offs.forEach((o, i) => { v.setUint32(520 + 4 * i, o, true); out.set(comp[i], 512 + o); });
+  const m = new DataView(out.buffer);
+  if (m.getUint32(0, true) != 0x58881688) throw new Error(T('badMagicVerify'));
+  for (let i = 0; i < n; i++) {
+    const o = m.getUint32(520 + 4 * i, true), e = i + 1 < n ? m.getUint32(524 + 4 * i, true) : m.getUint32(516, true);
+    const r = await inflate(out.slice(512 + o, 512 + e));
+    if (r.length != raws[i].length) throw new Error(T('verifyImgFail') + i);
+  }
+  return $('trim').checked ? out.slice(0, tot + ((512 - tot % 512) % 512)) : out;
+}
+
+let oba = null;
+async function unzip(u) {
+  const v = new DataView(u.buffer, u.byteOffset, u.byteLength);
+  let e = u.length - 22;
+  while (e >= 0 && v.getUint32(e, true) != 0x06054b50) e--;
+  if (e < 0) throw new Error(T('notZip'));
+  const n = v.getUint16(e + 10, true); let p = v.getUint32(e + 16, true); const out = [];
+  for (let i = 0; i < n; i++) {
+    const m = v.getUint16(p + 10, true), cs = v.getUint32(p + 20, true), nl = v.getUint16(p + 28, true), xl = v.getUint16(p + 30, true), cl = v.getUint16(p + 32, true), lo = v.getUint32(p + 42, true), name = new TextDecoder().decode(u.subarray(p + 46, p + 46 + nl));
+    p += 46 + nl + xl + cl;
+    if (name.endsWith('/')) continue;
+    const s = lo + 30 + v.getUint16(lo + 26, true) + v.getUint16(lo + 28, true);
+    let d = u.slice(s, s + cs);
+    if (m == 8) d = await pipe(d, DecompressionStream, 'deflate-raw');
+    else if (m != 0) throw new Error(T('badZipComp'));
+    out.push({ n: name, d });
+  }
+  return out;
+}
+
+async function loadBa() {
+  const f = $('ba').files[0];
+  if (!f) throw new Error(T('pickBaFirst'));
+  const e = await unzip(new Uint8Array(await f.arrayBuffer())), de = e.find(x => x.n == 'desc.txt');
+  if (!de) throw new Error(T('noDescTxt'));
+  const L = new TextDecoder().decode(de.d).split(/\r?\n/).map(x => x.trim()).filter(Boolean), [W, H, F] = L[0].split(/\s+/).map(Number);
+  const parts = [];
+  for (const l of L.slice(1)) { const x = l.split(/\s+/); if ((x[0] == 'p' || x[0] == 'c') && x[3] && !parts.includes(x[3])) parts.push(x[3]); }
+  oba = e; $('asz').value = W + 'x' + H; $('fps').value = F; $('pp').value = parts[0] || '';
+  window.__ltLastBaSummary = { w: W, h: H, fps: F, parts: parts.map(p => p + ' (' + e.filter(x => x.n.startsWith(p + '/')).length + ' frame)').join(', ') };
+  renderBaInfo();
+  log(T('baLoaded'), 'ok');
+}
+
+async function flashZip() {
+  const img = await build();
+  const sh = `#!/sbin/sh
 OUTFD=/proc/self/fd/$2; ZIP="$3"
 ui(){ echo "ui_print $1" > $OUTFD; echo "ui_print" > $OUTFD; }
 ui "Flash logo.img"
@@ -318,56 +819,285 @@ for P in /dev/block/by-name/logo$SLOT /dev/block/by-name/logo /dev/block/platfor
 done
 ui "Partisi logo tidak ketemu"; exit 1
 `;
- dl(zip([{n:'logo.img',d:img},{n:'META-INF/com/google/android/update-binary',d:enc(sh)},{n:'META-INF/com/google/android/updater-script',d:enc('#MAGISK\n')}]),'flash_logo.zip');log('flash_logo.zip siap')}
-async function anim(){const f=$('vid').files[0];if(!f)return log('Pilih video dulu');
- const[w,h]=$('asz').value.split('x').map(Number),fps=+$('fps').value,secs=+$('secs').value;
- log('Membaca video...');const v=document.createElement('video');v.muted=true;v.playsInline=true;v.preload='auto';
- {const p=wait(v,'loadedmetadata');v.src=URL.createObjectURL(f);v.load();await p}
- if(!(w>0&&h>0&&fps>0&&secs>0))throw new Error('Cek ukuran (contoh 720x1600), FPS, dan durasi');
- const pn=oba?$('pp').value.trim():'part0';if(oba&&!oba.some(x=>x.n.startsWith(pn+'/')))throw new Error('Part "'+pn+'" tidak ada di bootanimation asli');
- const N=Math.floor(Math.min(secs,v.duration)*fps),files=oba?[]:[{n:'desc.txt',d:enc(w+' '+h+' '+fps+'\np 0 0 part0\n')}];
- for(let i=0;i<N;i++){{const p=wait(v,'seeked',5000);v.currentTime=i/fps+.001;await p}
-  const c=fit(v,v.videoWidth,v.videoHeight,w,h,$('fm2').value),b=await new Promise(r=>c.toBlob(r,'image/jpeg',.85));
-  files.push({n:pn+'/'+String(i).padStart(4,'0')+'.jpg',d:await u8(b)});log('Frame '+(i+1)+'/'+N)}
- const ba=await u8(zip(oba?[...oba.filter(x=>!x.n.startsWith(pn+'/')),...files]:files));
- dl(zip([{n:'module.prop',d:enc('id=customboota\nname=Custom Boot Animation\nversion=1\nversionCode=1\nauthor=logotool\ndescription=Custom bootanimation\n')},
-  {n:'system/media/bootanimation.zip',d:ba},{n:'system/product/media/bootanimation.zip',d:ba},
-  {n:'META-INF/com/google/android/update-binary',d:enc('#MAGISK\n')},{n:'META-INF/com/google/android/updater-script',d:enc('#MAGISK\n')}]),'bootanim_module.zip');
- log('bootanim_module.zip siap')}
-</script>
+  await dl(zip([{ n: 'logo.img', d: img }, { n: 'META-INF/com/google/android/update-binary', d: enc(sh) }, { n: 'META-INF/com/google/android/updater-script', d: enc('#MAGISK\n') }]), 'flash_logo.zip');
+  log(T('flashZipReady'), 'ok');
+}
 
-<script>
-(function(){
- var d=document,g=function(i){return d.getElementById(i)},R=d.documentElement,K='lt-theme';
- function rd(){try{return localStorage.getItem(K)}catch(e){return null}}
- var mq=matchMedia('(prefers-color-scheme:dark)');
- function tc(){g('tc').content=R.dataset.theme=='dark'?'#0B1015':'#F1F5F9'}
- R.dataset.theme=rd()||(mq.matches?'dark':'light');tc();
- if(mq.addEventListener)mq.addEventListener('change',function(e){if(!rd()){R.dataset.theme=e.matches?'dark':'light';tc()}});
- g('tg').onclick=function(){var t=R.dataset.theme=='dark'?'light':'dark';
-  function set(){R.dataset.theme=t;tc();try{localStorage.setItem(K,t)}catch(e){}}
-  if(matchMedia('(prefers-reduced-motion:reduce)').matches)return set();
-  if(!d.startViewTransition){R.classList.add('tt');set();setTimeout(function(){R.classList.remove('tt')},400);return}
-  var r=this.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,
-   rad=(Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y))+80)*1.2;
-  R.classList.add('vt');var vt=d.startViewTransition(set);
-  vt.ready.then(function(){R.animate({clipPath:['circle(0px at '+x+'px '+y+'px)','circle('+rad+'px at '+x+'px '+y+'px)']},{duration:750,easing:'cubic-bezier(.4,0,.2,1)',fill:'both',pseudoElement:'::view-transition-new(root)'})});
-  vt.finished.then(function(){R.classList.remove('vt')},function(){R.classList.remove('vt')})};
- var tb=[g('t1'),g('t2')],pn=[g('p1'),g('p2')];
- function sel(i){tb.forEach(function(b,k){b.setAttribute('aria-selected',k==i);b.tabIndex=k==i?0:-1;pn[k].hidden=k!=i});g('seg').dataset.a=i}
- tb.forEach(function(b,k){b.onclick=function(){sel(k)};b.onkeydown=function(e){if(e.key=='ArrowRight'||e.key=='ArrowLeft'){sel(1-k);tb[1-k].focus()}}});
- d.querySelectorAll('.dz').forEach(function(z){var i=z.querySelector('input'),n=z.querySelector('.fn'),df=n.textContent;
-  i.addEventListener('change',function(){var f=i.files[0];n.textContent=f?f.name+' ('+(f.size/1048576).toFixed(2)+' MB)':df;z.classList.toggle('has',!!f)});
-  ['dragenter','dragover'].forEach(function(e){z.addEventListener(e,function(){z.classList.add('on')})});
-  ['dragleave','drop'].forEach(function(e){z.addEventListener(e,function(){z.classList.remove('on')})})});
- var st=g('st'),lg=g('log'),pg=g('pg');
- function cls(){var t=lg.textContent,s='ok';
-  if(!t)s='idle';else if(/^(GAGAL|Error|Gagal)/i.test(t))s='err';else if(/^(Bukan|Pilih|Cek)/.test(t))s='warn';else if(/^(Memproses|Membaca|Frame )/.test(t))s='busy';
-  st.dataset.s=s;var m=t.match(/^Frame (\d+)\/(\d+)/);pg.style.width=m?(100*m[1]/m[2])+'%':'0'}
- new MutationObserver(cls).observe(lg,{childList:true,characterData:true,subtree:true});cls();
- var im=g('imgs');
- new MutationObserver(function(){im.querySelectorAll('.c').forEach(function(c){var t=c.firstChild;
-  if(t&&t.nodeType==3&&/^#\d+$/.test(t.data)){var s=d.createElement('span');s.className='idx';s.textContent=t.data;c.replaceChild(s,t)}})}).observe(im,{childList:true,subtree:true});
+// Worker Pool using OffscreenCanvas + Transferable ImageBitmap
+function createEncodePool() {
+  if (typeof OffscreenCanvas === 'undefined' || typeof Worker === 'undefined') return null;
+  const workerSrc = `
+    let oc = null, ctx = null;
+    self.onmessage = async (e) => {
+      const { id, bitmap, w, h, mode } = e.data;
+      try {
+        if (!oc || oc.width !== w || oc.height !== h) {
+          oc = new OffscreenCanvas(w, h);
+          ctx = oc.getContext('2d', { alpha: false });
+        }
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, w, h);
+        const sw = bitmap.width, sh = bitmap.height;
+        if (mode === 'stretch') {
+          ctx.drawImage(bitmap, 0, 0, w, h);
+        } else {
+          const k = mode === 'contain' ? Math.min(w / sw, h / sh) : Math.max(w / sw, h / sh);
+          ctx.drawImage(bitmap, (w - sw * k) / 2, (h - sh * k) / 2, sw * k, sh * k);
+        }
+        bitmap.close();
+        const blob = await oc.convertToBlob({ type: 'image/jpeg', quality: 0.85 });
+        const ab = await blob.arrayBuffer();
+        self.postMessage({ id, buf: ab }, [ab]);
+      } catch (err) {
+        self.postMessage({ id, err: err.message || String(err) });
+      }
+    };
+  `;
+  const url = URL.createObjectURL(new Blob([workerSrc], { type: 'application/javascript' }));
+  const count = Math.max(1, (navigator.hardwareConcurrency || 4) - 1);
+  const workers = [];
+  for (let i = 0; i < count; i++) workers.push(new Worker(url));
+  let rr = 0;
+  return {
+    encode(bitmap, w, h, mode) {
+      return new Promise((resolve, reject) => {
+        const worker = workers[rr++ % workers.length];
+        const id = Math.random().toString(36).slice(2);
+        const onMsg = ev => {
+          if (ev.data.id !== id) return;
+          worker.removeEventListener('message', onMsg);
+          if (ev.data.err) reject(new Error(ev.data.err));
+          else resolve(new Uint8Array(ev.data.buf));
+        };
+        worker.addEventListener('message', onMsg);
+        worker.postMessage({ id, bitmap, w, h, mode }, [bitmap]);
+      });
+    },
+    destroy() {
+      workers.forEach(w => w.terminate());
+      URL.revokeObjectURL(url);
+    }
+  };
+}
+
+let nativeResolve = null;
+window.onNativeProgress = function (cur, tot) {
+  log(T('frameProg', { cur, tot }), 'busy', tot > 0 ? (100 * cur / tot) : 0);
+};
+window.onNativeBootAnimDone = function (jsonStr) {
+  if (window.AndroidRoot && AndroidRoot.setKeepScreenOn) AndroidRoot.setKeepScreenOn(false);
+  $('fg-warn').hidden = true;
+  if (!nativeResolve) return;
+  const r = nativeResolve; nativeResolve = null;
+  r(JSON.parse(jsonStr));
+};
+
+function showProf(dMs, rMs, eMs, zMs, tMs, modeLabel) {
+  const el = $('vprof');
+  el.hidden = false;
+  const line = `[${modeLabel}] Decode ${Math.round(dMs)}ms • Draw ${Math.round(rMs)}ms • Encode ${Math.round(eMs)}ms • ZIP ${Math.round(zMs)}ms • Total ${(tMs / 1000).toFixed(2)}s`;
+  el.textContent = line;
+  console.log('Video->BootAnim Profiling:', line);
+}
+
+async function anim() {
+  const f = $('vid').files[0];
+  if (!f) return log(T('pickVideoFirst'), 'warn');
+  const [w, h] = $('asz').value.split('x').map(Number), fps = +$('fps').value, secs = +$('secs').value;
+  if (!(w > 0 && h > 0 && fps > 0 && secs > 0)) throw new Error(T('checkVideoParams'));
+  const pn = oba ? $('pp').value.trim() : 'part0';
+  if (oba && !oba.some(x => x.n.startsWith(pn + '/'))) throw new Error(T('partNotFound', { pn }));
+
+  const fitMode = $('fm2').value;
+  $('fg-warn').hidden = false;
+  if (window.AndroidRoot && AndroidRoot.setKeepScreenOn) AndroidRoot.setKeepScreenOn(true);
+
+  try {
+    // Try fast hardware native pipeline first when available & no custom in-memory bootanimation override
+    if (!oba && window.AndroidRoot && AndroidRoot.createBootAnimationNative) {
+      const p = new Promise(res => { nativeResolve = res; });
+      const started = AndroidRoot.createBootAnimationNative(JSON.stringify({ width: w, height: h, fps, secs, fitMode, partName: pn }));
+      if (started === 'STARTED') {
+        const res = await p;
+        if (res && res.ok) {
+          showProf(res.decodeMs, res.drawMs, res.encodeMs, res.zipMs, res.totalMs, res.usedFallback ? 'Native-MMR' : 'Native-Codec');
+          log(T('bootAnimReady'), 'ok');
+          return;
+        }
+      } else {
+        nativeResolve = null;
+      }
+    }
+
+    // Fast JS pipeline (rVFC / fallback seek + OffscreenCanvas Worker Pool + Single-alloc STORED ZIP)
+    const tTotal0 = performance.now();
+    log(T('readingVideo'), 'busy', 0);
+    const v = document.createElement('video');
+    v.muted = true; v.playsInline = true; v.preload = 'auto';
+    const objUrl = URL.createObjectURL(f);
+    { const p = wait(v, 'loadedmetadata'); v.src = objUrl; v.load(); await p; }
+
+    const N = Math.floor(Math.min(secs, v.duration) * fps);
+    if (N <= 0) throw new Error(T('checkVideoParams'));
+
+    const pool = createEncodePool();
+    let decodeMs = 0, drawMs = 0, encodeMs = 0;
+    const encodePromises = new Array(N);
+    let lastProgUi = 0;
+
+    const emitProg = cur => {
+      const now = performance.now();
+      if (now - lastProgUi >= 100 || cur === N) {
+        lastProgUi = now;
+        log(T('frameProg', { cur, tot: N }), 'busy', 100 * cur / N);
+      }
+    };
+
+    const enqueueFrame = async (idx, videoEl) => {
+      const tDraw0 = performance.now();
+      if (pool) {
+        const bm = await createImageBitmap(videoEl);
+        drawMs += performance.now() - tDraw0;
+        const tEnc0 = performance.now();
+        encodePromises[idx] = pool.encode(bm, w, h, fitMode).then(bytes => {
+          encodeMs += performance.now() - tEnc0;
+          return bytes;
+        });
+      } else {
+        const c = fit(videoEl, videoEl.videoWidth, videoEl.videoHeight, w, h, fitMode);
+        drawMs += performance.now() - tDraw0;
+        const tEnc0 = performance.now();
+        encodePromises[idx] = new Promise(r => c.toBlob(r, 'image/jpeg', 0.85)).then(async b => {
+          const bytes = await u8(b);
+          encodeMs += performance.now() - tEnc0;
+          return bytes;
+        });
+      }
+    };
+
+    let usedRvfc = false;
+    if (typeof v.requestVideoFrameCallback === 'function') {
+      try {
+        await new Promise((resolve, reject) => {
+          let nextIdx = 0;
+          let failed = false;
+          const timeoutId = setTimeout(() => { failed = true; reject(new Error('rVFC timeout')); }, Math.max(12000, secs * 3000));
+          v.playbackRate = 2.0;
+          const onFrame = async (now, meta) => {
+            if (failed) return;
+            const mediaT = meta.mediaTime;
+            while (nextIdx < N && mediaT + 0.002 >= nextIdx / fps) {
+              const tD0 = performance.now();
+              await enqueueFrame(nextIdx, v);
+              decodeMs += performance.now() - tD0;
+              nextIdx++;
+              emitProg(nextIdx);
+            }
+            if (nextIdx >= N || v.ended) {
+              clearTimeout(timeoutId);
+              v.pause();
+              resolve();
+            } else {
+              v.requestVideoFrameCallback(onFrame);
+            }
+          };
+          v.requestVideoFrameCallback(onFrame);
+          v.play().catch(err => { clearTimeout(timeoutId); reject(err); });
+        });
+        usedRvfc = encodePromises.every(Boolean);
+      } catch (_) {
+        usedRvfc = false;
+      }
+    }
+
+    if (!usedRvfc) {
+      for (let i = 0; i < N; i++) {
+        if (encodePromises[i]) continue;
+        const tDec0 = performance.now();
+        const p = wait(v, 'seeked', 5000);
+        v.currentTime = i / fps + 0.001;
+        await p;
+        decodeMs += performance.now() - tDec0;
+        await enqueueFrame(i, v);
+        emitProg(i + 1);
+      }
+    }
+
+    const encodedFrames = await Promise.all(encodePromises);
+    if (pool) pool.destroy();
+    URL.revokeObjectURL(objUrl);
+
+    const tZip0 = performance.now();
+    const files = oba ? [] : [{ n: 'desc.txt', d: enc(w + ' ' + h + ' ' + fps + '\np 0 0 ' + pn + '\n') }];
+    for (let i = 0; i < encodedFrames.length; i++) {
+      files.push({ n: pn + '/' + String(i).padStart(4, '0') + '.jpg', d: encodedFrames[i] });
+    }
+    const ba = zip(oba ? [...oba.filter(x => !x.n.startsWith(pn + '/')), ...files] : files);
+    const mod = zip([
+      { n: 'module.prop', d: enc('id=customboota\nname=Custom Boot Animation\nversion=1\nversionCode=1\nauthor=logotool\ndescription=Custom bootanimation\n') },
+      { n: 'customize.sh', d: enc(CUSTOMIZE_SH) },
+      { n: 'system/media/bootanimation.zip', d: ba },
+      { n: 'system/product/media/bootanimation.zip', d: ba },
+      { n: 'META-INF/com/google/android/update-binary', d: enc('#MAGISK\n') },
+      { n: 'META-INF/com/google/android/updater-script', d: enc('#MAGISK\n') }
+    ]);
+    const zipMs = performance.now() - tZip0;
+    const totalMs = performance.now() - tTotal0;
+    showProf(decodeMs, drawMs, encodeMs, zipMs, totalMs, usedRvfc ? 'JS-rVFC+Pool' : 'JS-Seek+Pool');
+
+    await dl(mod, 'bootanim_module.zip');
+    log(T('bootAnimReady'), 'ok');
+  } finally {
+    $('fg-warn').hidden = true;
+    if (window.AndroidRoot && AndroidRoot.setKeepScreenOn) AndroidRoot.setKeepScreenOn(false);
+  }
+}
+
+(function () {
+  const R = document.documentElement;
+  const mq = matchMedia('(prefers-color-scheme:dark)');
+  let storedTheme = null;
+  try { storedTheme = localStorage.getItem('lt-theme'); } catch (e) {}
+  window.applyTheme(storedTheme || (mq.matches ? 'dark' : 'light'));
+
+  $('tg').onclick = function () {
+    const next = R.dataset.theme === 'dark' ? 'light' : 'dark';
+    window.applyTheme(next);
+    if (window.AndroidRoot && AndroidRoot.setTheme) AndroidRoot.setTheme(next);
+  };
+
+  $('lg').onclick = function () {
+    const next = LANG === 'id' ? 'en' : 'id';
+    window.setLang(next);
+    if (window.AndroidRoot && AndroidRoot.setLang) AndroidRoot.setLang(next);
+  };
+
+  $('stx').onclick = hideStatus;
+  $('st').onclick = function () { if (this.dataset.s === 'err') hideStatus(); };
+  $('outx').onclick = hideOut;
+
+  const tb = [$('t1'), $('t2')], pn = [$('p1'), $('p2')];
+  function sel(i) {
+    tb.forEach((b, k) => { b.setAttribute('aria-selected', k == i); b.tabIndex = k == i ? 0 : -1; pn[k].hidden = k != i; });
+    $('seg').dataset.a = i;
+  }
+  tb.forEach((b, k) => { b.onclick = () => sel(k); });
+
+  document.querySelectorAll('.dz').forEach(z => {
+    const i = z.querySelector('input'), n = z.querySelector('.fn');
+    i.addEventListener('change', function () {
+      const f = i.files[0];
+      if (f) {
+        n.textContent = f.name + ' (' + (f.size / 1048576).toFixed(2) + ' MB)';
+        z.classList.add('has');
+      } else {
+        n.textContent = T(n.dataset.i18n || 'noFile');
+        z.classList.remove('has');
+      }
+    });
+  });
+
+  window.setLang('id');
 })();
 </script>
 </body></html>

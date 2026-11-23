@@ -235,23 +235,6 @@ class BackupStore(private val context: Context) {
         }
     }
 
-    fun exportBackupToDownloads(backup: BackupEntry): Result<String> {
-        val dlDirQ = FileUtils.shellQuote(FileUtils.PUBLIC_DOWNLOAD_DIR)
-        val srcQ = FileUtils.shellQuote(backup.fullPath)
-        val dstPath = "${FileUtils.PUBLIC_DOWNLOAD_DIR}/${backup.fileName}"
-        val dstQ = FileUtils.shellQuote(dstPath)
-        val res = Shell.cmd(
-            "mkdir -p $dlDirQ",
-            "cp -f $srcQ $dstQ",
-            "chmod 664 $dstQ"
-        ).exec()
-        return if (res.isSuccess) {
-            Result.success(dstPath)
-        } else {
-            Result.failure(IllegalStateException("Gagal mengekspor backup ke $dstPath"))
-        }
-    }
-
     fun deleteBackup(backup: BackupEntry): Result<Unit> {
         val imgQ = FileUtils.shellQuote(backup.fullPath)
         val shaQ = FileUtils.shellQuote("${backup.fullPath}.sha256")

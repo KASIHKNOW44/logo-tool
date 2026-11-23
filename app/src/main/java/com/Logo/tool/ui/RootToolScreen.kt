@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -33,6 +34,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
@@ -40,15 +42,12 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.FolderOpen
-import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.outlined.Archive
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -94,6 +93,7 @@ fun RootToolScreen(
     state: MainUiState,
     viewModel: MainViewModel,
     copy: UiCopy,
+    listState: LazyListState,
     modifier: Modifier = Modifier
 ) {
     val c = LocalLogoColors.current
@@ -133,6 +133,7 @@ fun RootToolScreen(
             }
 
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .fillMaxWidth()
                     .widthIn(max = 760.dp)
@@ -141,8 +142,8 @@ fun RootToolScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                // A. Status Root
-                item {
+                // 1. Status Root
+                item(key = "card_root_status") {
                     SectionCard(
                         title = copy.rootStatusTitle,
                         icon = Icons.Filled.Security,
@@ -174,8 +175,8 @@ fun RootToolScreen(
                     }
                 }
 
-                // A2. Info Partisi
-                item {
+                // 2. Info Partisi
+                item(key = "card_partition_info") {
                     SectionCard(
                         title = copy.partInfoTitle,
                         icon = Icons.Filled.Storage
@@ -207,8 +208,8 @@ fun RootToolScreen(
                     }
                 }
 
-                // B. Dump
-                item {
+                // 3. Dump
+                item(key = "card_dump") {
                     SectionCard(
                         title = copy.dumpTitle,
                         icon = Icons.Filled.Download,
@@ -270,27 +271,41 @@ fun RootToolScreen(
 
                         state.lastDumpResult?.let { dump ->
                             StatusBannerBox(
-                                text = "${dump.downloadPath}\n${FileUtils.formatBytes(dump.sizeBytes)} • SHA-256: ${dump.sha256}",
+                                text = "${dump.suggestedName}\n${FileUtils.formatBytes(dump.sizeBytes)} • SHA-256: ${dump.sha256}",
                                 color = c.ok,
                                 icon = Icons.Filled.CheckCircle
                             )
-                            OutlinedButton(
-                                onClick = { viewModel.openLastDumpInEditor() },
-                                enabled = !state.isBusy,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .testTag("open_dump_in_editor_button")
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Icon(Icons.Filled.Build, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(Modifier.width(8.dp))
-                                Text(copy.openInEditorBtn)
+                                OutlinedButton(
+                                    onClick = { viewModel.openLastDumpInEditor() },
+                                    enabled = !state.isBusy,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .testTag("open_dump_in_editor_button")
+                                ) {
+                                    Icon(Icons.Filled.Build, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(copy.openInEditorBtn)
+                                }
+                                OutlinedButton(
+                                    onClick = { viewModel.saveLastDumpViaSaf() },
+                                    enabled = !state.isBusy,
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Icon(Icons.Filled.Save, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(copy.saveSafBtn)
+                                }
                             }
                         }
                     }
                 }
 
-                // C. Flash langsung ke partisi logo
-                item {
+                // 4. Flash ke Partisi Logo (index 3)
+                item(key = "card_flash") {
                     SectionCard(
                         title = copy.flashTitle,
                         icon = Icons.Filled.FlashOn
@@ -318,14 +333,37 @@ fun RootToolScreen(
                                 Spacer(Modifier.width(6.dp))
                                 Text(copy.useLastEditedBtn)
                             }
+                            if (state.pendingFlashFile != null) {
+                                OutlinedButton(
+                                    onClick = { viewModel.clearPendingFlashFile() },
+                                    enabled = !state.isBusy,
+                                    modifier = Modifier.testTag("clear_flash_file_button"),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = c.mute)
+                                ) {
+                                    Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text(copy.clearFileBtn)
+                                }
+                            }
                         }
 
-                        val sel = state.selectedFlashFile
+                        val sel = state.pendingFlashFile
+                        val targetLabel = state.partitionInfo?.let { info ->
+                            if (info.isAbDevice && state.flashBothSlots) {
+                                "${info.slotAPath} & ${info.slotBPath}"
+                            } else {
+                                info.detectedPath
+                            }
+                        } ?: "-"
+
                         if (sel == null) {
                             Text(copy.noFileSelected, style = MaterialTheme.typography.bodySmall, color = c.mute)
                         } else if (sel.validation.isValid) {
                             StatusBannerBox(
-                                text = "${sel.displayName} (${FileUtils.formatBytes(sel.validation.sizeBytes)})\nMTK Header OK (88 16 88 58 / logo)\nSHA-256: ${sel.validation.sha256}",
+                                text = "${sel.displayName} (${FileUtils.formatBytes(sel.validation.sizeBytes)})\n" +
+                                    "${copy.targetPartLabel}: $targetLabel\n" +
+                                    "MTK Header OK (88 16 88 58 / logo)\n" +
+                                    "SHA-256: ${sel.validation.sha256}",
                                 color = c.ok,
                                 icon = Icons.Filled.CheckCircle
                             )
@@ -426,8 +464,8 @@ fun RootToolScreen(
                     }
                 }
 
-                // C2. Backup & Restore
-                item {
+                // 5. Backup & Restore
+                item(key = "card_backup_restore") {
                     SectionCard(
                         title = copy.backupTitle,
                         icon = Icons.Filled.Backup,
@@ -503,7 +541,7 @@ fun RootToolScreen(
                                             pendingRestoreBackup = bk
                                         },
                                         onOpenEditor = { viewModel.openBackupInEditor(bk) },
-                                        onExport = { viewModel.exportBackupToDownloads(bk) },
+                                        onExport = { viewModel.exportBackupViaSaf(bk) },
                                         onShare = { viewModel.shareBackup(bk) },
                                         onDelete = { pendingDeleteBackup = bk }
                                     )
@@ -513,138 +551,8 @@ fun RootToolScreen(
                     }
                 }
 
-                // D. Flashable ZIP
-                item {
-                    SectionCard(
-                        title = copy.zipTitle,
-                        icon = Icons.Outlined.Archive,
-                        subtitle = copy.zipSubtitle
-                    ) {
-                        SegmentedChoiceRow(
-                            options = listOf(
-                                copy.zipWithBackup to state.zipWithBackup,
-                                copy.zipWithoutBackup to !state.zipWithBackup
-                            ),
-                            enabled = !state.isBusy,
-                            onSelect = { idx -> viewModel.setZipWithBackup(idx == 0) }
-                        )
-
-                        Button(
-                            onClick = { viewModel.buildFlashableZip() },
-                            enabled = !state.isBusy,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag("create_flashable_zip_button"),
-                            colors = ButtonDefaults.buttonColors(containerColor = c.accent, contentColor = c.onAccent)
-                        ) {
-                            Icon(Icons.Outlined.Archive, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text(copy.createZipBtn)
-                        }
-
-                        if (state.lastZipPath != null && state.lastZipCacheFile != null) {
-                            StatusBannerBox(
-                                text = state.lastZipPath,
-                                color = c.ok,
-                                icon = Icons.Filled.CheckCircle
-                            )
-                            OutlinedButton(
-                                onClick = {
-                                    FileUtils.shareFile(
-                                        context,
-                                        state.lastZipCacheFile,
-                                        state.lastZipCacheFile.name,
-                                        "application/zip"
-                                    )
-                                },
-                                enabled = !state.isBusy,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Icon(Icons.Filled.Share, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(Modifier.width(8.dp))
-                                Text(copy.shareBtn)
-                            }
-                        }
-                    }
-                }
-
-                // E. Ekspor mentah
-                item {
-                    SectionCard(
-                        title = copy.rawExportTitle,
-                        icon = Icons.Filled.Save
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            OutlinedButton(
-                                onClick = { viewModel.saveRawImg() },
-                                enabled = !state.isBusy,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .testTag("save_raw_img_button")
-                            ) {
-                                Icon(Icons.Filled.Save, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(Modifier.width(6.dp))
-                                Text(copy.saveAsImgBtn)
-                            }
-                            OutlinedButton(
-                                onClick = { viewModel.shareRawImg() },
-                                enabled = !state.isBusy,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .testTag("share_raw_img_button")
-                            ) {
-                                Icon(Icons.Filled.Share, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(Modifier.width(6.dp))
-                                Text(copy.shareBtn)
-                            }
-                        }
-                    }
-                }
-
-                // F. Bootanimation dari HP
-                item {
-                    SectionCard(
-                        title = copy.bootAnimTitle,
-                        icon = Icons.Filled.Movie,
-                        subtitle = copy.bootAnimSubtitle
-                    ) {
-                        Button(
-                            onClick = { viewModel.findDeviceBootAnimation(sendImmediately = true) },
-                            enabled = state.isRootAvailable && !state.isBusy,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag("find_bootanim_button"),
-                            colors = ButtonDefaults.buttonColors(containerColor = c.accent, contentColor = c.onAccent)
-                        ) {
-                            Icon(Icons.Filled.Movie, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text(copy.findBootAnimBtn)
-                        }
-
-                        state.bootAnimResult?.let { ba ->
-                            StatusBannerBox(
-                                text = "${ba.devicePath}\n${FileUtils.formatBytes(ba.sizeBytes)}",
-                                color = c.ok,
-                                icon = Icons.Filled.CheckCircle
-                            )
-                            OutlinedButton(
-                                onClick = { viewModel.sendFoundBootAnimToEditor() },
-                                enabled = !state.isBusy,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Icon(Icons.Filled.Build, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(Modifier.width(8.dp))
-                                Text(copy.loadBootAnimEditorBtn)
-                            }
-                        }
-                    }
-                }
-
-                // Log Terminal Live
-                item {
+                // 6. Log Terminal Live
+                item(key = "card_logs") {
                     SectionCard(
                         title = copy.logTitle,
                         icon = Icons.Filled.Code,
@@ -656,6 +564,7 @@ fun RootToolScreen(
                                         cm.setPrimaryClip(
                                             ClipData.newPlainText("LogoToolLogs", state.logs.joinToString("\n"))
                                         )
+                                        viewModel.emitMessage(copy.msgCopiedLogs)
                                     }
                                 ) {
                                     Icon(Icons.Filled.ContentCopy, contentDescription = copy.copyBtn, tint = c.accent)
@@ -690,7 +599,7 @@ fun RootToolScreen(
                     }
                 }
 
-                item {
+                item(key = "footer") {
                     Text(
                         text = copy.footerCredit,
                         style = MaterialTheme.typography.bodySmall,
@@ -707,7 +616,7 @@ fun RootToolScreen(
 
     // Flash confirmation dialog
     if (showFlashConfirmDialog) {
-        val sel = state.selectedFlashFile
+        val sel = state.pendingFlashFile
         val info = state.partitionInfo
         if (sel != null && info != null) {
             val targetLabel = if (info.isAbDevice && state.flashBothSlots) {
@@ -721,12 +630,12 @@ fun RootToolScreen(
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text("File: ${sel.displayName}")
-                        Text("Ukuran: ${FileUtils.formatBytes(sel.validation.sizeBytes)}")
+                        Text("Size: ${FileUtils.formatBytes(sel.validation.sizeBytes)}")
                         Text(
                             "SHA-256: ${sel.validation.sha256}",
                             style = MaterialTheme.typography.labelSmall.copy(fontFamily = JetBrainsMonoFontFamily)
                         )
-                        Text("Partisi: $targetLabel")
+                        Text("${copy.targetPartLabel}: $targetLabel")
                         Text(
                             "Mode: ${if (state.flashMode == FlashMode.BACKUP_AND_FLASH) copy.modeBackupFlash else copy.modeDirectFlash}"
                         )
@@ -735,7 +644,11 @@ fun RootToolScreen(
                             text = if (state.flashMode == FlashMode.DIRECT_FLASH) {
                                 copy.directFlashWarn
                             } else {
-                                "Pastikan baterai cukup dan file berasal dari logo.img HP ini agar tidak bootloop."
+                                if (state.language == "en") {
+                                    "Ensure battery is sufficient and this file belongs to your device model."
+                                } else {
+                                    "Pastikan baterai cukup dan file berasal dari logo.img HP ini agar tidak bootloop."
+                                }
                             },
                             color = if (state.flashMode == FlashMode.DIRECT_FLASH) c.err else c.warn,
                             style = MaterialTheme.typography.bodySmall

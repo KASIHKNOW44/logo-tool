@@ -55,8 +55,8 @@ data class BackupEntry(
 )
 
 data class DumpResult(
-    val downloadPath: String,
     val cacheFile: File,
+    val suggestedName: String,
     val sizeBytes: Long,
     val sha256: String,
     val slotLabel: String
@@ -75,10 +75,4 @@ data class FlashResult(
     val outcomes: List<FlashSlotOutcome>,
     val createdBackups: List<BackupEntry>,
     val errorMessage: String? = null
-)
-
-data class BootAnimFoundResult(
-    val devicePath: String,
-    val cacheFile: File,
-    val sizeBytes: Long
 )

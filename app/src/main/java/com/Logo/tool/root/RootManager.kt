@@ -176,7 +176,10 @@ class RootManager(private val context: Context) {
         return Result.success(targets)
     }
 
-    fun dumpLogo(
+    /**
+     * Dumps logo partition into app cacheDir for SAF saving or direct opening in Editor.
+     */
+    fun dumpLogoToCache(
         info: PartitionInfo,
         slotTarget: SlotTarget,
         trimTrailingFf: Boolean,
@@ -212,20 +215,11 @@ class RootManager(private val context: Context) {
         }
 
         val sha = FileUtils.sha256(cacheFile)
-        val finalPath = runCatching {
-            FileUtils.saveFileToPublicDownloads(
-                context = context,
-                sourceFile = cacheFile,
-                destFileName = fileName,
-                mimeType = "application/octet-stream"
-            )
-        }.getOrElse { return Result.failure(it) }
-
-        onLog("Dump selesai: $finalPath (SHA-256: $sha)")
+        onLog("Dump siap (${FileUtils.formatBytes(cacheFile.length())}, SHA-256: $sha)")
         return Result.success(
             DumpResult(
-                downloadPath = finalPath,
                 cacheFile = cacheFile,
+                suggestedName = fileName,
                 sizeBytes = cacheFile.length(),
                 sha256 = sha,
                 slotLabel = slotLabel
@@ -242,7 +236,6 @@ class RootManager(private val context: Context) {
     ): Result<FlashResult> {
         val targets = resolveTargetsForSlot(info, slotTarget).getOrElse { return Result.failure(it) }
 
-        // Mandatory validation against smallest target partition size
         val maxAllowedSize = targets.minOfOrNull { (label, _) ->
             when (label) {
                 "a" -> if (info.slotASize > 0) info.slotASize else info.sizeBytes
@@ -373,68 +366,5 @@ class RootManager(private val context: Context) {
         } finally {
             copied.delete()
         }
-    }
-
-    fun findAndLoadBootAnimation(onLog: (String) -> Unit): Result<BootAnimFoundResult> {
-        if (!isRootAvailable()) {
-            return Result.failure(IllegalStateException("Akses root diperlukan untuk membaca partisi sistem."))
-        }
-
-        val knownDirs = listOf(
-            "/system/media",
-            "/system/product/media",
-            "/product/media",
-            "/system_ext/media",
-            "/odm/media",
-            "/vendor/media",
-            "/my_product/media",
-            "/my_region/media",
-            "/my_stock/media",
-            "/my_heytap/media",
-            "/system/system/media",
-            "/system/system/product/media"
-        )
-
-        onLog("Mencari bootanimation.zip pada daftar path standar...")
-        val checks = knownDirs.joinToString("\n") { dir ->
-            val p = "$dir/bootanimation.zip"
-            """if [ -f ${FileUtils.shellQuote(p)} ]; then echo ${FileUtils.shellQuote(p)}; exit 0; fi"""
-        }
-        val script = """
-            $checks
-            FOUND=${'$'}(find /system /product /system_ext /odm /vendor /my_* -maxdepth 4 -name bootanimation.zip 2>/dev/null | head -n 1)
-            if [ -n "${'$'}FOUND" ]; then
-              echo "${'$'}FOUND"
-              exit 0
-            fi
-            exit 1
-        """.trimIndent()
-
-        val findRes = Shell.cmd(script).exec()
-        val foundPath = findRes.out.firstOrNull { it.trim().endsWith("bootanimation.zip") }?.trim()
-            ?: return Result.failure(IllegalStateException("bootanimation.zip tidak ditemukan di sistem HP."))
-
-        onLog("Ditemukan: $foundPath — menyalin ke cache...")
-        val cacheDir = File(context.cacheDir, "bootanim").apply { mkdirs() }
-        val outFile = File(cacheDir, "bootanimation.zip")
-        val uid = Process.myUid()
-        val copyRes = Shell.cmd(
-            "cp -f ${FileUtils.shellQuote(foundPath)} ${FileUtils.shellQuote(outFile.absolutePath)}",
-            "chmod 644 ${FileUtils.shellQuote(outFile.absolutePath)}",
-            "chown $uid:$uid ${FileUtils.shellQuote(outFile.absolutePath)} || true"
-        ).exec()
-
-        if (!copyRes.isSuccess || !outFile.exists() || outFile.length() == 0L) {
-            return Result.failure(IllegalStateException("Gagal menyalin $foundPath ke cache aplikasi."))
-        }
-
-        onLog("bootanimation.zip siap (${FileUtils.formatBytes(outFile.length())}).")
-        return Result.success(
-            BootAnimFoundResult(
-                devicePath = foundPath,
-                cacheFile = outFile,
-                sizeBytes = outFile.length()
-            )
-        )
     }
 }

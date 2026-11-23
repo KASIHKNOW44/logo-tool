@@ -1,34 +1,55 @@
 package com.Logo.tool.bridge
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Base64
 import android.webkit.JavascriptInterface
 import com.Logo.tool.util.FileUtils
 import java.io.File
 import java.io.FileOutputStream
+import java.util.concurrent.ConcurrentHashMap
 
 /**
- * JavascriptInterface exposed as window.AndroidRoot for bidirectional editor <-> root communication.
+ * Unified @JavascriptInterface exposed as window.AndroidRoot.
+ * All UI callbacks are dispatched safely to the main thread via Handler(Looper.getMainLooper()).
  */
 class RootBridge(
     private val context: Context,
     private val isRootChecker: () -> Boolean,
+    private val onSetTheme: (mode: String) -> Unit,
+    private val onSetLang: (lang: String) -> Unit,
+    private val onSetKeepScreenOn: (enabled: Boolean) -> Unit,
     private val onRequestDumpToEditor: () -> Unit,
-    private val onReceiveEditedLogoForFlash: (file: File) -> Unit
+    private val onReceiveEditedLogoForFlash: (file: File) -> Unit,
+    private val onReceiveFileForSafSave: (file: File, suggestedName: String, mimeType: String) -> Unit,
+    private val onRequestNativeBootAnim: (optionsJson: String) -> String
 ) {
-    private var flashFileName: String = "new_logo.img"
-    private var tempFlashFile: File? = null
-    private var tempOut: FileOutputStream? = null
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val transferFiles = ConcurrentHashMap<String, File>()
 
     @JavascriptInterface
-    fun isRootAvailable(): Boolean {
-        return isRootChecker()
+    fun isRootAvailable(): Boolean = isRootChecker()
+
+    @JavascriptInterface
+    fun setTheme(mode: String) {
+        mainHandler.post { onSetTheme(mode) }
+    }
+
+    @JavascriptInterface
+    fun setLang(lang: String) {
+        mainHandler.post { onSetLang(lang) }
+    }
+
+    @JavascriptInterface
+    fun setKeepScreenOn(enabled: Boolean) {
+        mainHandler.post { onSetKeepScreenOn(enabled) }
     }
 
     @JavascriptInterface
     fun requestLoadFromPhone(): String {
         return try {
-            onRequestDumpToEditor()
+            mainHandler.post { onRequestDumpToEditor() }
             "OK"
         } catch (t: Throwable) {
             "ERR: ${t.message}"
@@ -36,26 +57,38 @@ class RootBridge(
     }
 
     @JavascriptInterface
-    fun flashBegin(fileName: String): String {
+    fun receiveChunk(sessionId: String, index: Int, total: Int, base64Chunk: String): String {
         return try {
-            flashFileName = FileUtils.sanitizeFileName(fileName)
-            val dir = File(context.cacheDir, "bridge_flash").apply { mkdirs() }
-            val target = File(dir, flashFileName)
-            tempOut?.close()
-            tempFlashFile = target
-            tempOut = FileOutputStream(target)
-            "OK"
-        } catch (t: Throwable) {
-            "ERR: ${t.message}"
-        }
-    }
-
-    @JavascriptInterface
-    fun flashChunk(base64Chunk: String): String {
-        return try {
-            val out = tempOut ?: return "ERR: flashBegin() belum dipanggil"
+            val safeId = sessionId.replace(Regex("[^A-Za-z0-9_-]"), "_")
+            val dir = File(context.cacheDir, "pending_flash").apply { mkdirs() }
+            val tempFile = transferFiles.getOrPut(safeId) { File(dir, "$safeId.tmp") }
+            if (index == 0 && tempFile.exists()) {
+                tempFile.delete()
+            }
             val bytes = Base64.decode(base64Chunk, Base64.DEFAULT)
-            out.write(bytes)
+            FileOutputStream(tempFile, index > 0).use { fos ->
+                fos.write(bytes)
+            }
+            "OK:$index/$total"
+        } catch (t: Throwable) {
+            "ERR: ${t.message}"
+        }
+    }
+
+    @JavascriptInterface
+    fun finishTransfer(sessionId: String, fileName: String): String {
+        return try {
+            val safeId = sessionId.replace(Regex("[^A-Za-z0-9_-]"), "_")
+            val tempFile = transferFiles.remove(safeId)
+                ?: return "ERR: Sesi transfer tidak ditemukan"
+            val dir = File(context.cacheDir, "pending_flash").apply { mkdirs() }
+            val finalFile = File(dir, FileUtils.sanitizeFileName(fileName))
+            if (finalFile.exists()) finalFile.delete()
+            if (!tempFile.renameTo(finalFile)) {
+                tempFile.copyTo(finalFile, overwrite = true)
+                tempFile.delete()
+            }
+            mainHandler.post { onReceiveEditedLogoForFlash(finalFile) }
             "OK"
         } catch (t: Throwable) {
             "ERR: ${t.message}"
@@ -63,16 +96,32 @@ class RootBridge(
     }
 
     @JavascriptInterface
-    fun flashCommit(): String {
+    fun finishSaveTransfer(sessionId: String, suggestedName: String, mimeType: String): String {
         return try {
-            tempOut?.flush()
-            tempOut?.close()
-            tempOut = null
-            val file = tempFlashFile ?: return "ERR: file hasil edit tidak ditemukan"
-            onReceiveEditedLogoForFlash(file)
+            val safeId = sessionId.replace(Regex("[^A-Za-z0-9_-]"), "_")
+            val tempFile = transferFiles.remove(safeId)
+                ?: return "ERR: Sesi transfer simpan tidak ditemukan"
+            val dir = File(context.cacheDir, "pending_save").apply { mkdirs() }
+            val safeName = FileUtils.sanitizeFileName(suggestedName)
+            val finalFile = File(dir, safeName)
+            if (finalFile.exists()) finalFile.delete()
+            if (!tempFile.renameTo(finalFile)) {
+                tempFile.copyTo(finalFile, overwrite = true)
+                tempFile.delete()
+            }
+            mainHandler.post { onReceiveFileForSafSave(finalFile, safeName, mimeType) }
             "OK"
         } catch (t: Throwable) {
             "ERR: ${t.message}"
+        }
+    }
+
+    @JavascriptInterface
+    fun createBootAnimationNative(optionsJson: String): String {
+        return try {
+            onRequestNativeBootAnim(optionsJson)
+        } catch (t: Throwable) {
+            "ERR_FALLBACK: ${t.message}"
         }
     }
 }
