@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F1F5F9" id="tc">
+<title>Boot animation loader</title>
+<style>
+:root{color-scheme:light;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+ --bg:#F1F5F9;--surface:#FFFFFF;--soft:#F8FAFC;--ink:#0F172A;--mute:#556377;--line:#E2E8F0;--chip:#E6ECF2;--accent:#0F766E;--accent2:#0891B2;--on:#FFFFFF;--ok:#047857;--warn:#B45309;--err:#B91C1C;
+ --sh:0 1px 2px rgba(15,23,42,.05),0 10px 26px -14px rgba(15,23,42,.22);
+ --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+ --chk:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9.5'/%3E%3Cpath d='m7.8 12.5 3 3 5.4-6'/%3E%3C/svg%3E");
+ --swp:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 1l4 4-4 4'/%3E%3Cpath d='M3 11V9a4 4 0 0 1 4-4h14'/%3E%3Cpath d='M7 23l-4-4 4-4'/%3E%3Cpath d='M21 13v2a4 4 0 0 1-4 4H3'/%3E%3C/svg%3E")}
+:root[data-theme=dark]{color-scheme:dark;--bg:#0B1015;--surface:#121A22;--soft:#0F161D;--ink:#E6EDF3;--mute:#93A4B5;--line:#223040;--chip:#17212B;--accent:#2DD4BF;--accent2:#22D3EE;--on:#03211D;--ok:#34D399;--warn:#FBBF24;--err:#F87171;--sh:inset 0 1px 0 rgba(255,255,255,.03),0 16px 30px -18px rgba(0,0,0,.85)}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){color-scheme:dark;--bg:#0B1015;--surface:#121A22;--soft:#0F161D;--ink:#E6EDF3;--mute:#93A4B5;--line:#223040;--chip:#17212B;--accent:#2DD4BF;--accent2:#22D3EE;--on:#03211D;--ok:#34D399;--warn:#FBBF24;--err:#F87171;--sh:inset 0 1px 0 rgba(255,255,255,.03),0 16px 30px -18px rgba(0,0,0,.85)}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html{background:var(--bg)}
+body{margin:0;padding:0 0 32px;min-height:100vh;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;
+ background-image:radial-gradient(70% 340px at 50% 0,color-mix(in srgb,var(--accent) 14%,transparent),transparent 70%);background-repeat:no-repeat}
+::selection{background:color-mix(in srgb,var(--accent) 30%,transparent)}
+.wrap{max-width:1040px;margin:auto;padding-left:16px;padding-right:16px}
+.ic{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hd{display:flex;align-items:flex-start;gap:12px;padding-top:20px;padding-bottom:14px}
+.logo{width:46px;height:46px;flex:none;border-radius:14px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 10px 20px -10px var(--accent)}
+.logo .ic{width:26px;height:26px}
+.ttl{flex:1;min-width:0}
+h1{margin:0;font-size:1.3rem;font-weight:800;letter-spacing:-.02em;line-height:1.2}
+.sub{margin:3px 0 8px;color:var(--mute);font-size:13px}
+.badge{display:inline-flex;align-items:center;gap:7px;padding:4px 11px;border-radius:999px;font-size:12px;font-weight:700;color:var(--accent);background:color-mix(in srgb,var(--accent) 11%,transparent);border:1px solid color-mix(in srgb,var(--accent) 28%,transparent)}
+.badge i{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px color-mix(in srgb,currentColor 25%,transparent)}
+.ib{flex:none;width:42px;height:42px;display:grid;place-items:center;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;box-shadow:var(--sh)}
+:root[data-theme=dark] .mo,:root:not([data-theme=dark]) .su{display:none}
+.seg{position:relative;display:grid;grid-template-columns:1fr 1fr;padding:4px;margin:4px 0 14px;border-radius:16px;background:var(--chip);border:1px solid var(--line)}
+.seg::before{content:"";position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:12px;background:var(--surface);box-shadow:var(--sh);transition:transform .28s cubic-bezier(.4,0,.2,1)}
+.seg[data-a="1"]::before{transform:translateX(100%)}
+.tab{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:8px 10px;border:0;border-radius:12px;background:none;color:var(--mute);font:inherit;font-size:13px;font-weight:700;line-height:1.25;cursor:pointer;text-align:left}
+.tab[aria-selected=true]{color:var(--ink)}
+.tab[aria-selected=true] .ic{color:var(--accent)}
+#st{position:sticky;top:8px;z-index:5;display:flex;align-items:flex-start;gap:10px;margin:0 0 14px;padding:12px 14px 12px 18px;border-radius:14px;border:1px solid var(--line);background:var(--surface);box-shadow:var(--sh);overflow:hidden;--c:var(--mute)}
+#st::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c)}
+#st[data-s=busy]{--c:var(--accent)}#st[data-s=ok]{--c:var(--ok)}#st[data-s=warn]{--c:var(--warn)}#st[data-s=err]{--c:var(--err)}
+#st .ic{display:none;color:var(--c);margin-top:1px}
+#st[data-s=idle] [data-k=idle],#st[data-s=busy] [data-k=busy],#st[data-s=ok] [data-k=ok],#st[data-s=warn] [data-k=warn],#st[data-s=err] [data-k=err]{display:block}
+#st[data-s=busy] [data-k=busy]{animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#log{flex:1;min-width:0;font-size:13.5px;word-break:break-word;font-variant-numeric:tabular-nums}
+#log:empty::after{content:"Siap. Pilih alat di atas lalu muat file untuk mulai.";color:var(--mute)}
+#pg{position:absolute;left:0;bottom:0;height:3px;width:0;background:var(--accent);transition:width .2s}
+#out{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:14px 16px;border-radius:16px;font-size:14px;font-weight:600;color:var(--on);background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 14px 28px -14px var(--accent);word-break:break-word}
+#out::before{content:"";flex:none;width:30px;height:30px;background:currentColor;-webkit-mask:var(--chk) center/contain no-repeat;mask:var(--chk) center/contain no-repeat}
+#out a{color:inherit;font-weight:800;text-decoration:underline;text-underline-offset:3px}
+.cols{display:grid;gap:14px;align-items:start;animation:in .28s ease}
+@keyframes in{from{opacity:0;transform:translateY(6px)}}
+@media(min-width:900px){.cols{grid-template-columns:minmax(0,420px) minmax(0,1fr)}}
+.card{margin:0 0 14px;padding:16px;border-radius:18px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--sh)}
+.cols>div>.card:last-child{margin-bottom:0}
+h2{display:flex;align-items:center;gap:9px;margin:0 0 10px;font-size:15px;font-weight:800;letter-spacing:-.01em}
+.num{width:24px;height:24px;display:grid;place-items:center;border-radius:8px;font-size:12px;color:var(--on);background:var(--accent)}
+.hint{margin:0 0 12px;color:var(--mute);font-size:13px}
+.note{display:flex;gap:10px;margin:0 0 14px;padding:10px 12px;border-radius:12px;font-size:13px;background:color-mix(in srgb,var(--warn) 10%,transparent);border:1px solid color-mix(in srgb,var(--warn) 30%,transparent)}
+.note .ic{color:var(--warn);margin-top:1px}.note p{margin:0}
+.field{display:block;margin:0 0 12px;color:var(--mute);font-size:13px;font-weight:600}
+.field>span,.lbl{display:block;margin-bottom:6px}
+.lbl{color:var(--mute);font-size:13px;font-weight:600}
+input[type=text],select{width:100%;min-height:44px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--soft);color:var(--ink);font:inherit;font-variant-numeric:tabular-nums}
+select{appearance:none;-webkit-appearance:none;padding-right:36px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:16px}
+input[type=text]:focus,select:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 22%,transparent)}
+.dz{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;margin:0 0 12px;padding:22px 14px;text-align:center;cursor:pointer;border-radius:16px;border:2px dashed color-mix(in srgb,var(--accent) 42%,var(--line));background:color-mix(in srgb,var(--accent) 7%,transparent);transition:background .15s,border-color .15s}
+.dz:hover,.dz.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 15%,transparent)}
+.dz:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.dz input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.dz .ic{width:30px;height:30px;color:var(--accent)}
+.dz b{font-size:14px}
+.fn{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--mute);font-size:12.5px}
+.dz.has{border-style:solid}.dz.has .fn{color:var(--accent);font-weight:700}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:46px;margin:0 0 8px;padding:10px 14px;border:0;border-radius:12px;background:var(--accent);color:var(--on);font:inherit;font-weight:700;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 10px 20px -12px var(--accent);transition:transform .12s,filter .12s}
+.btn.t{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 32%,transparent)}
+.btn:hover{filter:brightness(1.07)}.btn:active{transform:translateY(1px)}.btn:last-child{margin-bottom:0}
+.btn:focus-visible,.tab:focus-visible,.ib:focus-visible,summary:focus-visible,#imgs .b:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.ck{display:flex;align-items:flex-start;gap:10px;margin:0 0 10px;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--soft);font-size:13px;cursor:pointer}
+.ck input{flex:none;width:18px;height:18px;margin:1px 0 0;accent-color:var(--accent)}
+details{margin:0 0 10px;padding:0 14px;border-radius:14px;border:1px solid var(--line);background:var(--soft)}
+summary{display:flex;align-items:center;justify-content:space-between;min-height:48px;font-weight:700;cursor:pointer;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"";width:18px;height:18px;background:var(--mute);-webkit-mask:var(--chev) center/contain no-repeat;mask:var(--chev) center/contain no-repeat;transition:transform .2s}
+details[open] summary{margin-bottom:12px;border-bottom:1px solid var(--line)}
+details[open] summary::after{transform:rotate(180deg)}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+#imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+#imgs:empty{display:block}
+#imgs:empty::before{content:"Belum ada gambar. Muat logo.img untuk melihat pratinjau di sini.";display:block;padding:44px 14px;text-align:center;color:var(--mute);border:1.5px dashed var(--line);border-radius:14px}
+#imgs .c{display:flex;flex-direction:column;margin:0;padding:8px;border-radius:14px;border:1px solid var(--line);background:var(--soft);font-size:12px;font-weight:800;transition:transform .15s,border-color .15s}
+#imgs .c:hover{transform:translateY(-2px);border-color:var(--accent)}
+.idx{align-self:flex-start;padding:2px 9px;border-radius:999px;font-size:11px;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);font-variant-numeric:tabular-nums}
+#imgs canvas{width:100%!important;height:180px!important;margin:8px 0!important;object-fit:contain;border-radius:10px;background:#000}
+#imgs .b{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:10px;background:var(--surface);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);font-size:13px;font-weight:700;cursor:pointer}
+#imgs .b::before{content:"";width:14px;height:14px;background:currentColor;-webkit-mask:var(--swp) center/contain no-repeat;mask:var(--swp) center/contain no-repeat}
+#imgs .b:hover{background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+footer{margin-top:24px;padding-top:18px;border-top:1px solid var(--line);text-align:center;color:var(--mute);font-size:12.5px}
+::view-transition-group(root),::view-transition-image-pair(root),::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+::view-transition-new(root){will-change:clip-path}
+:root.vt *{transition:none!important}
+:root.tt *{transition:background-color .35s,color .35s,border-color .35s!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-chip" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="3"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3M10.5 9.8l3.5 2.2-3.5 2.2z"/></symbol>
+<symbol id="i-img" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.6"/><path d="m21 15-4.5-4.5L6 21"/></symbol>
+<symbol id="i-film" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7 3v18M17 3v18M3 8h4M3 16h4M17 8h4M17 16h4"/></symbol>
+<symbol id="i-up" viewBox="0 0 24 24"><path d="M12 13v8M8 17l4-4 4 4"/><path d="M20 16.7A5 5 0 0 0 18 7h-1.3A8 8 0 1 0 4 15.3"/></symbol>
+<symbol id="i-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16 9.5"/></symbol>
+<symbol id="i-warn" viewBox="0 0 24 24"><path d="M10.3 3.9 2.4 17.6a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></symbol>
+<symbol id="i-err" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15 9-6 6M9 9l6 6"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+<symbol id="i-spin" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.2-8.55"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
+<symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M5 21h14"/></symbol>
+<symbol id="i-pkg" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m10 9 5 3-5 3z"/></symbol>
+<symbol id="i-open" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+</defs></svg>
+
+<header class="wrap hd">
+ <div class="logo"><svg class="ic"><use href="#i-chip"/></svg></div>
+ <div class="ttl"><h1>Boot animation loader</h1>
+  <p class="sub">Edit logo boot MTK (logo.img) &amp; buat boot animation. Jalan offline, tidak ada yang diunggah.</p>
+  <span class="badge"><i></i>100% Offline &bull; Client-Side</span></div>
+ <button class="ib" id="tg" type="button" aria-label="Ganti tema Dark/Light" title="Ganti tema"><svg class="ic su"><use href="#i-sun"/></svg><svg class="ic mo"><use href="#i-moon"/></svg></button>
+</header>
+
+<main class="wrap">
+ <div class="seg" id="seg" data-a="0" role="tablist">
+  <button class="tab" id="t1" type="button" role="tab" aria-selected="true" aria-controls="p1"><svg class="ic"><use href="#i-img"/></svg><span>1. Edit logo.img</span></button>
+  <button class="tab" id="t2" type="button" role="tab" aria-selected="false" aria-controls="p2" tabindex="-1"><svg class="ic"><use href="#i-film"/></svg><span>2. Video &rarr; Boot Animation</span></button>
+ </div>
+
+ <div id="st" data-s="idle" role="status" aria-live="polite">
+  <svg class="ic" data-k="idle"><use href="#i-info"/></svg><svg class="ic" data-k="busy"><use href="#i-spin"/></svg><svg class="ic" data-k="ok"><use href="#i-ok"/></svg><svg class="ic" data-k="warn"><use href="#i-warn"/></svg><svg class="ic" data-k="err"><use href="#i-err"/></svg>
+  <span id="log"></span><i id="pg"></i>
+ </div>
+ <div id="out" hidden></div>
+
+ <section class="cols" id="p1" role="tabpanel" aria-labelledby="t1">
+  <div>
+   <div class="card">
+    <h2><span class="num">1</span>Muat logo.img</h2>
+    <div class="note"><svg class="ic"><use href="#i-warn"/></svg><p><b>Wajib:</b> muat logo.img ASLI dari HP-mu dulu. Format, jumlah gambar, resolusi, dan ukuran file dipakai persis agar tidak bootloop.</p></div>
+    <label class="dz"><input type="file" id="lf"><svg class="ic"><use href="#i-up"/></svg><b>Pilih atau seret logo.img ke sini</b><span class="fn">Belum ada file dipilih</span></label>
+    <label class="field"><span>Ukuran manual (opsional, kalau tidak terdeteksi), contoh 1080x2400</span><input type="text" id="sz" placeholder="kosongkan = otomatis"></label>
+    <button class="btn" type="button" onclick="run(loadLogo)"><svg class="ic"><use href="#i-open"/></svg>Muat logo.img</button>
+   </div>
+   <div class="card" id="act" hidden>
+    <h2><span class="num">2</span>Ganti &amp; simpan</h2>
+    <label class="field"><span><b>Logo boot</b> (otomatis terdeteksi, biasanya #0). Nomor yang diganti:</span><input type="text" id="bi"></label>
+    <label class="field"><span>Cara pas ke layar:</span><select id="fm"><option value="cover">Isi penuh (tanpa celah, tepi dipotong)</option><option value="contain">Muat semua (ada garis hitam)</option><option value="stretch">Regang (tanpa celah, bisa gepeng)</option></select></label>
+    <span class="lbl">Pilih foto untuk logo boot:</span>
+    <label class="dz"><input type="file" id="all" accept="image/*" onchange="run(()=>repBoot(this.files[0]))"><svg class="ic"><use href="#i-img"/></svg><b>Pilih atau seret foto</b><span class="fn">Belum ada foto dipilih</span></label>
+    <label class="ck"><input type="checkbox" id="trim" checked><span>Potong ukuran file (hanya sebesar isi; sisa partisi tidak diubah)</span></label>
+    <p class="hint">Gambar lain (animasi/ikon pengisian baterai) tidak disentuh. Bisa juga ganti satuan di kotak di bawah.</p>
+    <button class="btn" type="button" onclick="run(async()=>{await dl(build(),'new_logo.img');log('new_logo.img siap')})"><svg class="ic"><use href="#i-dl"/></svg>Simpan new_logo.img</button>
+    <button class="btn t" type="button" onclick="run(flashZip)"><svg class="ic"><use href="#i-pkg"/></svg>Buat zip flash untuk OFOX</button>
+   </div>
+  </div>
+  <div class="card">
+   <h2>Galeri gambar</h2>
+   <p class="hint">Pratinjau tiap gambar di dalam logo.img. Tekan Ganti untuk mengganti satu gambar saja.</p>
+   <div id="imgs"></div>
+  </div>
+ </section>
+
+ <section class="cols" id="p2" role="tabpanel" aria-labelledby="t2" hidden>
+  <div class="card">
+   <h2><span class="num">1</span>Video &rarr; Boot Animation</h2>
+   <span class="lbl"><b>Langkah 1:</b> pilih video</span>
+   <label class="dz"><input type="file" id="vid" accept="video/*"><svg class="ic"><use href="#i-film"/></svg><b>Pilih atau seret video</b><span class="fn">Belum ada video dipilih</span></label>
+   <span class="lbl"><b>Langkah 2:</b> tekan tombol</span>
+   <button class="btn" type="button" onclick="run(anim)"><svg class="ic"><use href="#i-play"/></svg>Buat boot animation</button>
+   <p class="hint" style="margin:12px 0 0">Hasilnya <b>bootanim_module.zip</b>. Pasang lewat <b>Magisk &gt; Modul &gt; Install dari penyimpanan</b>, lalu reboot.</p>
+  </div>
+  <div class="card">
+   <h2>Opsi</h2>
+   <details><summary>Pengaturan (boleh dilewati)</summary>
+    <label class="field"><span>Cara pas ke layar:</span><select id="fm2"><option value="cover">Isi penuh (tanpa celah, tepi dipotong)</option><option value="contain">Muat semua (ada garis hitam)</option><option value="stretch">Regang (tanpa celah, bisa gepeng)</option></select></label>
+    <div class="row3">
+     <label class="field"><span>Ukuran</span><input type="text" id="asz" value="720x1600"></label>
+     <label class="field"><span>FPS</span><input type="text" id="fps" value="20"></label>
+     <label class="field"><span>Durasi (detik)</span><input type="text" id="secs" value="6"></label>
+    </div>
+   </details>
+   <details><summary>Lanjutan: ganti sebagian saja (boleh dilewati)</summary>
+    <p class="hint">Muat bootanimation.zip asli dari HP (/system/media atau /product/media) supaya hanya satu part yang diganti. Ukuran dan FPS otomatis mengikuti file asli.</p>
+    <label class="dz"><input type="file" id="ba" accept=".zip,application/zip"><svg class="ic"><use href="#i-pkg"/></svg><b>Pilih atau seret bootanimation.zip</b><span class="fn">Belum ada file dipilih</span></label>
+    <button class="btn t" type="button" onclick="run(loadBa)"><svg class="ic"><use href="#i-open"/></svg>Muat bootanimation asli</button>
+    <p class="hint" id="bainfo" style="margin:4px 0 12px"></p>
+    <label class="field"><span>Part yang diganti:</span><input type="text" id="pp" placeholder="mis. part0"></label>
+   </details>
+  </div>
+ </section>
+
+ <footer>Boot animation loader &middot; Credit: <b>K4T, CLAUDE AI, Jester</b><br>Lisensi MIT &middot; bebas dipakai siapa pun, tolong tetap cantumkan credit.</footer>
+</main>
+
+<script>
+const $=id=>document.getElementById(id),log=m=>$('log').textContent=m;
+const RES=[[1080,2400],[1080,2408],[1080,2460],[720,1600],[720,1612],[720,1560],[720,1520],[1080,2340],[1080,1920],[720,1440],[720,1280],[1440,3200],[1440,3120],[540,960],[480,854],[1200,2640]];
+let hdr,raws=[],fmts=[],origLen=0,hdrDelta=0,origData,origTot=0;
+const crcT=Uint32Array.from({length:256},(_,n)=>{for(let k=0;k<8;k++)n=n&1?0xEDB88320^(n>>>1):n>>>1;return n>>>0});
+const crc=u=>{let c=-1;for(let i=0;i<u.length;i++)c=crcT[(c^u[i])&255]^(c>>>8);return(c^-1)>>>0};
+const hd=(sz,vals)=>{const b=new DataView(new ArrayBuffer(sz));let o=0;for(const[v,n]of vals){n==2?b.setUint16(o,v,true):b.setUint32(o,v,true);o+=n}return b.buffer};
+const enc=s=>new TextEncoder().encode(s);
+function zip(files){const parts=[],cen=[];let off=0;
+ for(const f of files){const nb=enc(f.n),c=crc(f.d),L=f.d.length;
+  const lh=hd(30,[[0x04034b50,4],[20,2],[0,2],[0,2],[0,2],[0x21,2],[c,4],[L,4],[L,4],[nb.length,2],[0,2]]);
+  parts.push(lh,nb,f.d);
+  cen.push(hd(46,[[0x02014b50,4],[20,2],[20,2],[0,2],[0,2],[0,2],[0x21,2],[c,4],[L,4],[L,4],[nb.length,2],[0,2],[0,2],[0,2],[0,2],[0,4],[off,4]]),nb);
+  off+=30+nb.length+L}
+ let cs=0;for(const x of cen)cs+=x.byteLength||x.length;
+ return new Blob([...parts,...cen,hd(22,[[0x06054b50,4],[0,2],[0,2],[files.length,2],[files.length,2],[cs,4],[off,4],[0,2]])])}
+const pipe=async(u,S,f)=>new Uint8Array(await new Response(new Blob([u]).stream().pipeThrough(new S(f||'deflate'))).arrayBuffer());
+const inflate=u=>pipe(u,DecompressionStream),deflate=u=>pipe(u,CompressionStream);
+const u8=async b=>new Uint8Array(await b.arrayBuffer());
+const run=async f=>{try{log('Memproses...');await f()}catch(e){log('GAGAL: '+(e.message||e))}};
+onerror=(m)=>log('Error: '+m);onunhandledrejection=e=>log('Error: '+(e.reason&&e.reason.message||e.reason));
+async function dl(b,n){b=await b;if(!(b instanceof Blob))b=new Blob([b]);
+ if(window.Android&&Android.begin){let r=Android.begin(n);if(r.startsWith('ERR'))throw new Error(r);
+  for(let p=0;p<b.size;p+=3145728){const s=await new Promise(q=>{const f=new FileReader();f.onload=()=>q(f.result.split(',')[1]);f.readAsDataURL(b.slice(p,p+3145728))});r=Android.chunk(s);if(r.startsWith('ERR'))throw new Error(r)}
+  r=Android.end();if(r.startsWith('ERR'))throw new Error(r);const o=$('out');o.hidden=false;o.textContent='Tersimpan di: '+r+' ('+(b.size/1048576).toFixed(1)+' MB)';return}const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=n;a.click();
+ const o=$('out'),l=document.createElement('a');o.hidden=false;o.innerHTML='';l.href=u;l.download=n;l.textContent='Kalau belum terunduh, tap di sini: '+n+' ('+(b.size/1048576).toFixed(1)+' MB)';o.append(l)}
+const wait=(o,ev,ms=8000)=>new Promise((res,rej)=>{const t=setTimeout(()=>rej(new Error('Timeout '+ev+' - video mungkin tidak didukung browser (coba mp4 H.264)')),ms);o['on'+ev]=()=>{clearTimeout(t);res()};o.onerror=()=>{clearTimeout(t);rej(new Error('Video tidak bisa dibaca browser (coba mp4 H.264)'))}});
+
+function guess(r){const m=$('sz').value.match(/(\d+)\s*x\s*(\d+)/i),c=m?[[+m[1],+m[2]]]:RES;
+ for(const[w,h]of c)for(const b of[4,3,2])if(r.length==w*h*b)return{w,h,b};return null}
+function toImg(r,f){const n=f.w*f.h,o=new Uint8ClampedArray(n*4);
+ for(let i=0;i<n;i++){let R,G,B;
+  if(f.b==4){B=r[4*i];G=r[4*i+1];R=r[4*i+2]}
+  else if(f.b==3){B=r[3*i];G=r[3*i+1];R=r[3*i+2]}
+  else{const p=r[2*i]|r[2*i+1]<<8;R=(p>>11)*255/31;G=(p>>5&63)*255/63;B=(p&31)*255/31}
+  o[4*i]=R;o[4*i+1]=G;o[4*i+2]=B;o[4*i+3]=255}
+ return new ImageData(o,f.w,f.h)}
+function fromImg(d,f){const n=f.w*f.h,p=d.data,o=new Uint8Array(n*f.b);
+ for(let i=0;i<n;i++){const R=p[4*i],G=p[4*i+1],B=p[4*i+2];
+  if(f.b==4){o[4*i]=B;o[4*i+1]=G;o[4*i+2]=R;o[4*i+3]=255}
+  else if(f.b==3){o[3*i]=B;o[3*i+1]=G;o[3*i+2]=R}
+  else{const v=(R*31/255|0)<<11|(G*63/255|0)<<5|(B*31/255|0);o[2*i]=v&255;o[2*i+1]=v>>8}}
+ return o}
+function fit(s,sw,sh,w,h,m){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+ x.fillStyle='#000';x.fillRect(0,0,w,h);
+ if(m=='stretch'){x.drawImage(s,0,0,w,h);return c}
+ const k=m=='contain'?Math.min(w/sw,h/sh):Math.max(w/sw,h/sh);
+ x.drawImage(s,(w-sw*k)/2,(h-sh*k)/2,sw*k,sh*k);return c}
+
+async function loadLogo(){const f=$('lf').files[0];if(!f)return log('Pilih logo.img dulu');
+ const d=new Uint8Array(await f.arrayBuffer()),v=new DataView(d.buffer);
+ if(d.length<600||v.getUint32(0,true)!=0x58881688)return log('Bukan logo.img MTK (magic tidak cocok)');
+ hdr=d.slice(0,512);const n=v.getUint32(512,true),tot=v.getUint32(516,true);origLen=d.length;origData=d;origTot=tot;hdrDelta=v.getUint32(4,true)-tot;
+ raws=[];fmts=[];$('imgs').innerHTML='';
+ try{for(let i=0;i<n;i++){const o=v.getUint32(520+4*i,true),e=i+1<n?v.getUint32(524+4*i,true):tot;
+  const r=await inflate(d.slice(512+o,512+e));raws.push(r);fmts.push(guess(r));show(i)}}
+ catch(e){return log('Gagal baca: '+e)}
+ const same=[];for(let i=0;i<raws.length;i++){const A=raws[0],B=raws[i];if(A.length!=B.length)continue;let q=1;for(let k=0;k<A.length;k+=3)if(A[k]!=B[k]){q=0;break}if(q)same.push(i)}
+ $('bi').value=same.join(',');$('act').hidden=false;const ok=fmts.filter(x=>x).length;
+ log(n+' gambar ('+ok+' besar bisa diedit, '+(n-ok)+' kecil dibiarkan), file asli '+(origLen/1048576).toFixed(2)+' MB. Hasil memakai format & ukuran yang sama.')}
+function thumb(r,f,k){const w=f.w/k|0,h=f.h/k|0,o=new Uint8ClampedArray(w*h*4);
+ for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=y*k*f.w+x*k;let R,G,B;
+  if(f.b==4){B=r[4*i];G=r[4*i+1];R=r[4*i+2]}else if(f.b==3){B=r[3*i];G=r[3*i+1];R=r[3*i+2]}
+  else{const p=r[2*i]|r[2*i+1]<<8;R=(p>>11)*255/31;G=(p>>5&63)*255/63;B=(p&31)*255/31}
+  const j=4*(y*w+x);o[j]=R;o[j+1]=G;o[j+2]=B;o[j+3]=255}
+ return new ImageData(o,w,h)}
+function show(i){const f=fmts[i];if(!f)return;let c=$('c'+i);if(!c){c=document.createElement('div');c.className='c';c.id='c'+i;$('imgs').append(c)}else c.innerHTML='';
+ c.append('#'+i);const k=8,cv=document.createElement('canvas');cv.width=f.w/k|0;cv.height=f.h/k|0;cv.style.cssText='width:100%;display:block;margin:4px 0';
+ cv.getContext('2d').putImageData(thumb(raws[i],f,k),0,0);c.append(cv);
+ const l=document.createElement('label'),inp=document.createElement('input');l.className='b';l.textContent='Ganti';inp.type='file';inp.accept='image/*';inp.hidden=true;inp.onchange=()=>run(()=>rep(i,inp.files[0]));l.append(inp);c.append(l)}
+async function rep(i,file){const f=fmts[i];if(!f||!file)return;
+ const bm=await createImageBitmap(file),c=fit(bm,bm.width,bm.height,f.w,f.h,$('fm').value);
+ raws[i]=fromImg(c.getContext('2d').getImageData(0,0,f.w,f.h),f);show(i)}
+async function repBoot(file){if(!file)return;const ids=$('bi').value.split(',').map(x=>x.trim()).filter(x=>x!=='').map(Number);
+ for(const i of ids){if(!fmts[i])throw new Error('Nomor '+i+' tidak bisa diedit');await rep(i,file)}log('Logo boot diganti: #'+ids.join(', #'))}
+async function build(){if(!raws.length)throw new Error('Muat logo.img asli dulu');
+ const comp=[];for(const r of raws)comp.push(await deflate(r));
+ const n=comp.length;let cur=8+4*n;const offs=[];for(const c of comp){offs.push(cur);cur+=c.length}
+ const tot=512+cur;
+ if(tot>origLen)throw new Error('Hasil ('+tot+' byte) lebih besar dari logo asli ('+origLen+' byte). Di-flash bisa rusak/bootloop. Pakai gambar lebih sederhana (warna polos/gradasi) atau gambar asli dibiarkan sebagian.');
+ const out=origData.slice(),v=new DataView(out.buffer);
+ out.fill(255,512,512+origTot);out.set(hdr);v.setUint32(4,cur+hdrDelta,true);v.setUint32(512,n,true);v.setUint32(516,cur,true);
+ offs.forEach((o,i)=>{v.setUint32(520+4*i,o,true);out.set(comp[i],512+o)});
+ const m=new DataView(out.buffer);if(m.getUint32(0,true)!=0x58881688)throw new Error('verifikasi: magic salah');
+ for(let i=0;i<n;i++){const o=m.getUint32(520+4*i,true),e=i+1<n?m.getUint32(524+4*i,true):m.getUint32(516,true);
+  const r=await inflate(out.slice(512+o,512+e));if(r.length!=raws[i].length)throw new Error('verifikasi gagal gambar '+i)}
+ return $('trim').checked?out.slice(0,tot+((512-tot%512)%512)):out}
+</script>
+<script>
+let oba=null;
+async function unzip(u){const v=new DataView(u.buffer,u.byteOffset,u.byteLength);let e=u.length-22;while(e>=0&&v.getUint32(e,true)!=0x06054b50)e--;if(e<0)throw new Error('Bukan file zip');
+ const n=v.getUint16(e+10,true);let p=v.getUint32(e+16,true);const out=[];
+ for(let i=0;i<n;i++){const m=v.getUint16(p+10,true),cs=v.getUint32(p+20,true),nl=v.getUint16(p+28,true),xl=v.getUint16(p+30,true),cl=v.getUint16(p+32,true),lo=v.getUint32(p+42,true),name=new TextDecoder().decode(u.subarray(p+46,p+46+nl));p+=46+nl+xl+cl;
+  if(name.endsWith('/'))continue;
+  const s=lo+30+v.getUint16(lo+26,true)+v.getUint16(lo+28,true);let d=u.slice(s,s+cs);
+  if(m==8)d=await pipe(d,DecompressionStream,'deflate-raw');else if(m!=0)throw new Error('Jenis kompresi zip tidak didukung');
+  out.push({n:name,d})}
+ return out}
+async function loadBa(){const f=$('ba').files[0];if(!f)throw new Error('Pilih bootanimation.zip asli dulu');
+ const e=await unzip(new Uint8Array(await f.arrayBuffer())),de=e.find(x=>x.n=='desc.txt');if(!de)throw new Error('desc.txt tidak ada, ini bukan bootanimation.zip');
+ const L=new TextDecoder().decode(de.d).split(/\r?\n/).map(x=>x.trim()).filter(Boolean),[W,H,F]=L[0].split(/\s+/).map(Number);
+ const parts=[];for(const l of L.slice(1)){const x=l.split(/\s+/);if((x[0]=='p'||x[0]=='c')&&x[3]&&!parts.includes(x[3]))parts.push(x[3])}
+ oba=e;$('asz').value=W+'x'+H;$('fps').value=F;$('pp').value=parts[0]||'';
+ $('bainfo').textContent='Ukuran '+W+'x'+H+', '+F+' FPS. Part: '+parts.map(p=>p+' ('+e.filter(x=>x.n.startsWith(p+'/')).length+' frame)').join(', ')+'. Isi "Part yang diganti" dengan part animasi logo (biasanya yang pertama).';
+ log('bootanimation asli dimuat')}
+async function flashZip(){const img=await build();
+ const sh=`#!/sbin/sh
+OUTFD=/proc/self/fd/$2; ZIP="$3"
+ui(){ echo "ui_print $1" > $OUTFD; echo "ui_print" > $OUTFD; }
+ui "Flash logo.img"
+mkdir -p /tmp/lt; unzip -o "$ZIP" logo.img -d /tmp/lt
+SLOT=$(getprop ro.boot.slot_suffix)
+for P in /dev/block/by-name/logo$SLOT /dev/block/by-name/logo /dev/block/platform/*/by-name/logo; do
+  if [ -e "$P" ]; then dd if=/tmp/lt/logo.img of=$P && ui "OK: $P" && exit 0; fi
+done
+ui "Partisi logo tidak ketemu"; exit 1
+`;
+ dl(zip([{n:'logo.img',d:img},{n:'META-INF/com/google/android/update-binary',d:enc(sh)},{n:'META-INF/com/google/android/updater-script',d:enc('#MAGISK\n')}]),'flash_logo.zip');log('flash_logo.zip siap')}
+async function anim(){const f=$('vid').files[0];if(!f)return log('Pilih video dulu');
+ const[w,h]=$('asz').value.split('x').map(Number),fps=+$('fps').value,secs=+$('secs').value;
+ log('Membaca video...');const v=document.createElement('video');v.muted=true;v.playsInline=true;v.preload='auto';
+ {const p=wait(v,'loadedmetadata');v.src=URL.createObjectURL(f);v.load();await p}
+ if(!(w>0&&h>0&&fps>0&&secs>0))throw new Error('Cek ukuran (contoh 720x1600), FPS, dan durasi');
+ const pn=oba?$('pp').value.trim():'part0';if(oba&&!oba.some(x=>x.n.startsWith(pn+'/')))throw new Error('Part "'+pn+'" tidak ada di bootanimation asli');
+ const N=Math.floor(Math.min(secs,v.duration)*fps),files=oba?[]:[{n:'desc.txt',d:enc(w+' '+h+' '+fps+'\np 0 0 part0\n')}];
+ for(let i=0;i<N;i++){{const p=wait(v,'seeked',5000);v.currentTime=i/fps+.001;await p}
+  const c=fit(v,v.videoWidth,v.videoHeight,w,h,$('fm2').value),b=await new Promise(r=>c.toBlob(r,'image/jpeg',.85));
+  files.push({n:pn+'/'+String(i).padStart(4,'0')+'.jpg',d:await u8(b)});log('Frame '+(i+1)+'/'+N)}
+ const ba=await u8(zip(oba?[...oba.filter(x=>!x.n.startsWith(pn+'/')),...files]:files));
+ dl(zip([{n:'module.prop',d:enc('id=customboota\nname=Custom Boot Animation\nversion=1\nversionCode=1\nauthor=logotool\ndescription=Custom bootanimation\n')},
+  {n:'system/media/bootanimation.zip',d:ba},{n:'system/product/media/bootanimation.zip',d:ba},
+  {n:'META-INF/com/google/android/update-binary',d:enc('#MAGISK\n')},{n:'META-INF/com/google/android/updater-script',d:enc('#MAGISK\n')}]),'bootanim_module.zip');
+ log('bootanim_module.zip siap')}
+</script>
+
+<script>
+(function(){
+ var d=document,g=function(i){return d.getElementById(i)},R=d.documentElement,K='lt-theme';
+ function rd(){try{return localStorage.getItem(K)}catch(e){return null}}
+ var mq=matchMedia('(prefers-color-scheme:dark)');
+ function tc(){g('tc').content=R.dataset.theme=='dark'?'#0B1015':'#F1F5F9'}
+ R.dataset.theme=rd()||(mq.matches?'dark':'light');tc();
+ if(mq.addEventListener)mq.addEventListener('change',function(e){if(!rd()){R.dataset.theme=e.matches?'dark':'light';tc()}});
+ g('tg').onclick=function(){var t=R.dataset.theme=='dark'?'light':'dark';
+  function set(){R.dataset.theme=t;tc();try{localStorage.setItem(K,t)}catch(e){}}
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches)return set();
+  if(!d.startViewTransition){R.classList.add('tt');set();setTimeout(function(){R.classList.remove('tt')},400);return}
+  var r=this.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,
+   rad=(Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y))+80)*1.2;
+  R.classList.add('vt');var vt=d.startViewTransition(set);
+  vt.ready.then(function(){R.animate({clipPath:['circle(0px at '+x+'px '+y+'px)','circle('+rad+'px at '+x+'px '+y+'px)']},{duration:750,easing:'cubic-bezier(.4,0,.2,1)',fill:'both',pseudoElement:'::view-transition-new(root)'})});
+  vt.finished.then(function(){R.classList.remove('vt')},function(){R.classList.remove('vt')})};
+ var tb=[g('t1'),g('t2')],pn=[g('p1'),g('p2')];
+ function sel(i){tb.forEach(function(b,k){b.setAttribute('aria-selected',k==i);b.tabIndex=k==i?0:-1;pn[k].hidden=k!=i});g('seg').dataset.a=i}
+ tb.forEach(function(b,k){b.onclick=function(){sel(k)};b.onkeydown=function(e){if(e.key=='ArrowRight'||e.key=='ArrowLeft'){sel(1-k);tb[1-k].focus()}}});
+ d.querySelectorAll('.dz').forEach(function(z){var i=z.querySelector('input'),n=z.querySelector('.fn'),df=n.textContent;
+  i.addEventListener('change',function(){var f=i.files[0];n.textContent=f?f.name+' ('+(f.size/1048576).toFixed(2)+' MB)':df;z.classList.toggle('has',!!f)});
+  ['dragenter','dragover'].forEach(function(e){z.addEventListener(e,function(){z.classList.add('on')})});
+  ['dragleave','drop'].forEach(function(e){z.addEventListener(e,function(){z.classList.remove('on')})})});
+ var st=g('st'),lg=g('log'),pg=g('pg');
+ function cls(){var t=lg.textContent,s='ok';
+  if(!t)s='idle';else if(/^(GAGAL|Error|Gagal)/i.test(t))s='err';else if(/^(Bukan|Pilih|Cek)/.test(t))s='warn';else if(/^(Memproses|Membaca|Frame )/.test(t))s='busy';
+  st.dataset.s=s;var m=t.match(/^Frame (\d+)\/(\d+)/);pg.style.width=m?(100*m[1]/m[2])+'%':'0'}
+ new MutationObserver(cls).observe(lg,{childList:true,characterData:true,subtree:true});cls();
+ var im=g('imgs');
+ new MutationObserver(function(){im.querySelectorAll('.c').forEach(function(c){var t=c.firstChild;
+  if(t&&t.nodeType==3&&/^#\d+$/.test(t.data)){var s=d.createElement('span');s.className='idx';s.textContent=t.data;c.replaceChild(s,t)}})}).observe(im,{childList:true,subtree:true});
+})();
+</script>
+</body></html>
