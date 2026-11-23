@@ -63,17 +63,3 @@ Backup **tidak pernah dihapus otomatis** oleh aplikasi.
 
 ---
 
-## Cara Build Lewat GitHub Actions (Tanpa Android Studio)
-
-Repository ini sudah menyertakan `.github/workflows/build.yml`.
-
-1. Upload seluruh project ini ke repository GitHub Anda (`main` atau `master`).
-2. *(Opsional)* Jika ingin menandatangani release APK dengan keystore sendiri, tambahkan Secrets di **Settings → Secrets and variables → Actions**:
-   - `KEYSTORE_BASE64` (hasil `base64 -w0 release.keystore`)
-   - `KEYSTORE_PASSWORD`
-   - `KEY_ALIAS`
-   - `KEY_PASSWORD`
-   Jika secrets tidak diisi, workflow otomatis membuat keystore fallback agar build tetap berhasil.
-3. Workflow berjalan otomatis setiap `push`, `pull_request`, atau bisa dijalankan manual lewat tab **Actions → Build Logo Tool APK → Run workflow**.
-4. Setelah selesai, buka run workflow terbaru di tab **Actions** dan unduh artifact **`BootLogoTool-debug`** atau **`BootLogoTool-release`**.
-5. Jika Anda mendorong tag versi (misalnya `git tag v1.0.0 && git push origin v1.0.0`), GitHub Release otomatis dibuat dengan kedua APK terlampir.
