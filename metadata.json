@@ -1,0 +1,8 @@
+{
+  "name": "Logo Tool",
+  "description": "Offline MediaTek MTK logo.img editor, boot animation creator, and root partition backup/flash utility.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

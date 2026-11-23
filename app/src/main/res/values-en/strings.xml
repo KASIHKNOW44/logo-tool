@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Logo Tool</string>
+    <string name="tab_editor">Logo Editor</string>
+    <string name="tab_root">Root Tool</string>
+    <string name="toggle_theme">Toggle Theme</string>
+    <string name="toggle_language">ID / EN</string>
+</resources>
